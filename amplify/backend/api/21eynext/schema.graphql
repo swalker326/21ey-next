@@ -1,0 +1,39 @@
+type Goal
+  @model(
+    mutations: {
+      create: "createGoal"
+      delete: "deleteGoal"
+      update: "updateGoal"
+    }
+    timestamps: null
+    subscriptions: { level: public }
+  )
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "owner"
+        provider: userPools
+        operations: [read, create, delete, update]
+      }
+    ]
+  )
+  @key(
+    name: "BySpecificOwner"
+    fields: ["owner", "createdAt"]
+    queryField: "listGoalsBySpecificOwner"
+  ) {
+  type: String!
+  id: ID
+  owner: String!
+  status: GoalStatus
+  name: String!
+  startDate: AWSDate!
+  createdAt: AWSDateTime!
+  daysCompleted: [AWSDate]
+}
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+}

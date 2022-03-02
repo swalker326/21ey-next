@@ -1,8 +1,26 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/globals.css";
+import { useEffect, useState } from "react";
+import { AppWrapper, useAppContext } from "../src/context/state";
+import type { AppProps } from "next/app";
+import Amplify, { Auth } from "aws-amplify";
+import config from "../src/aws-exports";
+import { AppNavBar } from "../src/components/AppNavBar";
+import { Container } from "react-bootstrap";
+Amplify.configure({
+  ...config,
+  ssr: true,
+});
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return (
+    <AppWrapper>
+      <AppNavBar />
+      <div>
+        <Component style={{}} {...pageProps} />
+      </div>
+    </AppWrapper>
+  );
 }
 
-export default MyApp
+export default MyApp;

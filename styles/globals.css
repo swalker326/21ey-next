@@ -14,3 +14,17 @@ a {
 * {
   box-sizing: border-box;
 }
+.form-check-input {
+  background-image: url("data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27><circle r=%273%27 fill=%27%23666%27/></svg>") !important;
+}
+.form-check-input:checked {
+  background-color: #666 !important;
+  border-color: #6668 !important;
+  background-image: url("data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27><circle r=%273%27 fill=%27%23fff%27/></svg>") !important;
+}
+
+.form-check-input:focus {
+  border-color: #6668 !important;
+  outline: 0;
+  box-shadow: none !important;
+}
