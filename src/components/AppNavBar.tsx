@@ -7,8 +7,7 @@ import { Auth } from "aws-amplify";
 import { CognitoUserAmplify } from "@aws-amplify/ui";
 import { useAppContext } from "../context/state";
 import { useRouter } from "next/router";
-import { ModeButton } from "./ModeButton";
-import { ModeIcon } from "./ModeIcon";
+import { ModeIcon } from "./shared/ModeIcon";
 
 export const AppNavBar = () => {
   const state = useAppContext();

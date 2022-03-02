@@ -4,12 +4,12 @@ import {
 } from "@fortawesome/react-fontawesome";
 import React, { ForwardedRef, ForwardRefExoticComponent } from "react";
 
-import { useAppContext } from "../context/state";
+import { useAppContext } from "../../context/state";
 
 export const ModeIcon = React.forwardRef<HTMLAnchorElement, FontAwesomeIconProps>((props, ref) => {
   const theme = useAppContext();
   return (
-    <a ref={ref} className={props.className}>
+    <a ref={ref} href={props.href} className={props.className}>
       <FontAwesomeIcon
         style={props.style}
         size={props.size}

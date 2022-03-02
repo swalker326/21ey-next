@@ -3,7 +3,7 @@ import { Col, Container, Modal, Row } from "react-bootstrap";
 import dayjs, { Dayjs } from "dayjs";
 import { Goal as GoalComponent } from "./Goal";
 import { Goal }  from "../API";
-import { ModeButton } from "./ModeButton";
+import { ModeButton } from "./shared/ModeButton";
 type GoalsOverViewProps = {
   goal: Goal
 }

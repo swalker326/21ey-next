@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { ModeButton } from "../../components/ModeButton";
+import { ModeButton } from "../../components/shared/ModeButton";
 import { RegisterFormProps } from "./@types";
 import { Formik, Form, Field } from "formik";
 import { object, string } from "yup";

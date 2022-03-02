@@ -1,12 +1,13 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useState, useEffect } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { Col } from "react-bootstrap";
-import BlackX from "./BlackXSvg";
-import * as subscriptions from "../graphql/subscriptions";
+import BlackX from "./shared/BlackXSvg";
 import { updateGoal } from "../graphql/mutations";
 import { API, graphqlOperation } from "aws-amplify";
-import { OnUpdateGoalSubscription } from "../API";
+import { GraphQLResult } from "@aws-amplify/api-graphql";
 import { Observable } from "zen-observable-ts";
+import { OnUpdateGoalSubscription } from "../API";
+import { onUpdateGoal } from "../graphql/subscriptions";
 
 type GoalProps = {
   id: string | undefined | null;
@@ -16,11 +17,6 @@ type GoalProps = {
   daysCompleted: (string | null)[] | undefined | null;
   setDisplayModal: Dispatch<SetStateAction<boolean>>;
   setModalData: Dispatch<SetStateAction<string | undefined>>;
-};
-
-type ObservableGoal = OnUpdateGoalSubscription & {
-  value: any;
-  provider: any;
 };
 
 export const Goal = ({
@@ -34,6 +30,21 @@ export const Goal = ({
 }: GoalProps) => {
   const isToday = date.isSame(dayjs(), "day");
   const [isCompleted, setIsCompleted] = useState(dayCompleted);
+
+  useEffect(() => {
+    const pubSubClient = API.graphql(
+      graphqlOperation(onUpdateGoal),
+    ) as Observable<object>;
+    const subscription = pubSubClient.subscribe({
+      next: (value: GraphQLResult<OnUpdateGoalSubscription>) => {
+        console.log(value);
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const updateGoalDailyCompletion = () => {
     const updatedGoal = {
       id,
@@ -46,6 +57,7 @@ export const Goal = ({
     API.graphql(graphqlOperation(updateGoal, { input: updatedGoal }));
     setIsCompleted(true);
   };
+
   const handleDayClick = () => {
     setModalData(`You can't complete tasks in the
     ${
@@ -62,6 +74,7 @@ export const Goal = ({
       setDisplayModal(true);
     }
   };
+
   return (
     <Col
       onClick={handleDayClick}

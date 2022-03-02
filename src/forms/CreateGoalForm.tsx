@@ -2,7 +2,7 @@ import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "reac
 import dayjs, { Dayjs } from "dayjs";
 import { Form, Field, Formik } from "formik";
 import { date, object, string } from "yup";
-import { ModeButton } from "../components/ModeButton";
+import { ModeButton } from "../components/shared/ModeButton";
 import { API, graphqlOperation } from "aws-amplify";
 import { createGoal } from "../graphql/mutations";
 import { useAppContext } from "../context/state";

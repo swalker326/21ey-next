@@ -2,7 +2,7 @@ import React, { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { Col, Container } from "react-bootstrap";
 import { Formik, Form, Field } from "formik";
 import { object, string } from "yup";
-import { ModeButton } from "../../components/ModeButton";
+import { ModeButton } from "../../components/shared/ModeButton";
 import { RegisterFormProps } from "./@types";
 
 export const ConfirmSignUpForm = ({

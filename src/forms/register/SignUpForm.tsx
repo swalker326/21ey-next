@@ -3,7 +3,7 @@ import { RegisterFormProps } from "./@types";
 import { Container, Row, Col } from "react-bootstrap";
 import { Formik, Form, Field } from "formik";
 import { object, string } from "yup";
-import { ModeButton } from "../../components/ModeButton";
+import { ModeButton } from "../../components/shared/ModeButton";
 import { useAppContext } from "../../context/state";
 
 export const SignUpForm = ({
