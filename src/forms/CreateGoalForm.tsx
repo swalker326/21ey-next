@@ -1,5 +1,11 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
-import dayjs, { Dayjs } from "dayjs";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
+import dayjs from "dayjs";
 import { Form, Field, Formik } from "formik";
 import { date, object, string } from "yup";
 import { ModeButton } from "../components/shared/ModeButton";
@@ -7,17 +13,32 @@ import { API, graphqlOperation } from "aws-amplify";
 import { createGoal } from "../graphql/mutations";
 import { useAppContext } from "../context/state";
 import { GoalStatus } from "../API";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 type GoalCreateFormState = {
   goalName: string;
   startDate: string;
 };
-
-type GoalCreateFormProps = {
-  setGoalAdded: Dispatch<SetStateAction<boolean>>
+type LocalGoalAttributes = {
+  name: string,
+  type: "goal",
+  owner: string,
+  status: GoalStatus,
+  startDate: string,
+  createdAt: string,
+  daysCompleted?: string[]|null
 }
 
-export const CreateGoalForm = ({setGoalAdded}:GoalCreateFormProps) => {
+export const CreateGoalForm = () => {
+  const [localGoal, setLocalGoal] = useLocalStorage<LocalGoalAttributes>("21ey_local_goal", {
+    name: "",
+    type: "goal",
+    owner: "local_owner",
+    status: GoalStatus.ACTIVE,
+    startDate: "",
+    createdAt: "",
+    daysCompleted: []
+  });
   const initialState: GoalCreateFormState = {
     goalName: "",
     startDate: dayjs().toISOString().split("T")[1],
@@ -39,30 +60,45 @@ export const CreateGoalForm = ({setGoalAdded}:GoalCreateFormProps) => {
         startDate: goalState.startDate,
         createdAt: dayjs().toISOString(),
       };
-      console.log("Trying to add: ", goal)
+      console.log("Trying to add: ", goal);
       await API.graphql(graphqlOperation(createGoal, { input: goal }));
-      setGoalAdded(true);
       setGoalState(initialState);
     } catch (err) {
       console.log("error creating goal: ", err);
     }
+  };
+  const addLocalGoal = () => {
+    const goal:LocalGoalAttributes = {
+      name: goalState.goalName,
+      type: "goal",
+      owner: "local_owner",
+      status: GoalStatus.ACTIVE,
+      startDate: goalState.startDate,
+      createdAt: dayjs().toISOString(),
+      daysCompleted: []
+    };
+    setLocalGoal(goal);
   };
   const onChangeState = (e: ChangeEvent<HTMLInputElement>) => {
     setGoalState({ ...goalState, [e.target.name]: e.target.value });
   };
 
   return (
-    <div>
+    <div style={{ display: "flex", maxWidth: "600px" }}>
       <Formik
         initialValues={{ goalName: "", startDate: dayjs() }}
         validationSchema={CreateGoalFormSchema}
         onSubmit={async (values, { setSubmitting }) => {
-          addGoal();
+          if (state.user) {
+            addGoal();
+          } else {
+            addLocalGoal()
+          }
         }}
       >
         {({ handleChange }) => {
           return (
-            <Form className="d-flex flex-column" style={{ maxWidth: "500px" }}>
+            <Form className="d-flex flex-column">
               <Field
                 id="goalName"
                 type="text"
@@ -89,7 +125,9 @@ export const CreateGoalForm = ({setGoalAdded}:GoalCreateFormProps) => {
                 }}
                 style={{ margin: "6px 0" }}
               />
-              <ModeButton type="submit">Add Goal</ModeButton>
+              <div className="d-flex justify-content-end">
+                <ModeButton type="submit">Add</ModeButton>
+              </div>
             </Form>
           );
         }}

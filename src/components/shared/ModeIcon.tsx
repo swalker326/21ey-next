@@ -11,6 +11,7 @@ export const ModeIcon = React.forwardRef<HTMLAnchorElement, FontAwesomeIconProps
   return (
     <a ref={ref} href={props.href} className={props.className}>
       <FontAwesomeIcon
+        onClick={props.onClick}
         style={props.style}
         size={props.size}
         icon={props.icon}

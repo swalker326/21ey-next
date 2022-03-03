@@ -1,13 +1,16 @@
 import { FC, useState } from "react";
 import { Col, Container, Modal, Row } from "react-bootstrap";
 import dayjs, { Dayjs } from "dayjs";
-import { Goal as GoalComponent } from "./Goal";
+import { Day } from "./Day";
 import { Goal }  from "../API";
 import { ModeButton } from "./shared/ModeButton";
+import { useAppContext } from "../context/state";
 type GoalsOverViewProps = {
   goal: Goal
 }
-const GoalOverview:FC<GoalsOverViewProps> = ({goal: {id, name, startDate, daysCompleted}}) => {
+const GoalOverview:FC<GoalsOverViewProps> = ({goal}) => {
+  const {id, name, startDate, daysCompleted} = goal
+  const state = useAppContext();
   const startDateObj = dayjs(startDate);
   const endDate = startDateObj.add(21, "days");
   const days = Array.from(Array(endDate.diff(startDateObj, "days")).keys());
@@ -21,7 +24,6 @@ const GoalOverview:FC<GoalsOverViewProps> = ({goal: {id, name, startDate, daysCo
     setDisplayModal(false);
   };
   const isDayCompleted = (date:Dayjs) => {
-    
     const daysArray = daysCompleted && daysCompleted.length > 0 && daysCompleted.map(d => dayjs(d))
     let completed = false
     daysArray && daysArray.forEach(d => {
@@ -40,7 +42,7 @@ const GoalOverview:FC<GoalsOverViewProps> = ({goal: {id, name, startDate, daysCo
           <Row>
             {daysAsDates.map((date: Dayjs, index: number) => {
               return (
-                <GoalComponent
+                <Day
                   id={id}
                   daysCompleted={daysCompleted}
                   dayCompleted = {isDayCompleted(date)}
@@ -49,6 +51,7 @@ const GoalOverview:FC<GoalsOverViewProps> = ({goal: {id, name, startDate, daysCo
                   date={date}
                   day={index + 1}
                   setDisplayModal={setDisplayModal}
+                  localGoal={state.user ? goal : null}
                 />
               );
             })}

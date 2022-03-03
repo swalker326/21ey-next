@@ -8,8 +8,9 @@ import { GraphQLResult } from "@aws-amplify/api-graphql";
 import { Observable } from "zen-observable-ts";
 import { OnUpdateGoalSubscription } from "../API";
 import { onUpdateGoal } from "../graphql/subscriptions";
+import { useAppContext } from "../context/state";
 
-type GoalProps = {
+type DayProps = {
   id: string | undefined | null;
   day: number;
   date: Dayjs;
@@ -17,9 +18,10 @@ type GoalProps = {
   daysCompleted: (string | null)[] | undefined | null;
   setDisplayModal: Dispatch<SetStateAction<boolean>>;
   setModalData: Dispatch<SetStateAction<string | undefined>>;
+  localGoal?: object|null;
 };
 
-export const Goal = ({
+export const Day = ({
   id,
   day,
   date,
@@ -27,32 +29,35 @@ export const Goal = ({
   daysCompleted,
   setDisplayModal,
   setModalData,
-}: GoalProps) => {
+  localGoal
+}: DayProps) => {
+  const state = useAppContext();
   const isToday = date.isSame(dayjs(), "day");
   const [isCompleted, setIsCompleted] = useState(dayCompleted);
 
   useEffect(() => {
-    const pubSubClient = API.graphql(
-      graphqlOperation(onUpdateGoal),
-    ) as Observable<object>;
-    const subscription = pubSubClient.subscribe({
-      next: (value: GraphQLResult<OnUpdateGoalSubscription>) => {
-        console.log(value);
-      },
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
+    if (state.user?.username) {
+      const pubSubClient = API.graphql(
+        graphqlOperation(onUpdateGoal),
+      ) as Observable<object>;
+      const subscription = pubSubClient.subscribe({
+        next: (value: GraphQLResult<OnUpdateGoalSubscription>) => {
+          console.log(value);
+        },
+      });
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
   }, []);
 
   const updateGoalDailyCompletion = () => {
     const updatedGoal = {
       id,
-      daysCompleted: daysCompleted &&
-        daysCompleted.length > 1 && [
-          ...daysCompleted,
-          date.format("YYYY-MM-DD"),
-        ],
+      daysCompleted:
+        daysCompleted && daysCompleted.length > 1
+          ? [...daysCompleted, date.format("YYYY-MM-DD")]
+          : [date.format("YYYY-MM-DD")],
     };
     API.graphql(graphqlOperation(updateGoal, { input: updatedGoal }));
     setIsCompleted(true);

@@ -49,24 +49,20 @@ export const Register: React.FC = ({ children }) => {
       );
       /* Once the user successfully confirms their account, update form state to show the sign in form*/
       setFormInputState({ ...formInputState });
-      state.setFormState('signIn')
+      state.setFormState("signIn");
     } catch (err) {
       console.log({ err });
     }
   };
 
   const signin = async () => {
-    try {
-      Auth.signIn(formInputState.email, formInputState.password).then(
-        (user) => {
-          setFormInputState({ ...formInputState });
-          state.setUser(user);
-          state.setFormState('signedIn')
-        },
-      );
-    } catch (err) {
-      console.log({ err });
-    }
+    Auth.signIn(formInputState.email, formInputState.password)
+      .then((user) => {
+        setFormInputState({ ...formInputState });
+        state.setUser(user);
+        state.setFormState("signedIn");
+      })
+      .catch((error) => console.log(error));
   };
 
   if (state.formState === "signUp")
