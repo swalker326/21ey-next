@@ -65,7 +65,9 @@ export const AppWrapper: FC = ({ children }) => {
           const newUserName = payload.data.username.toString();
           const goalString = window.localStorage.getItem("21ey_local_goal")
           const goal = goalString && JSON.parse(goalString);
-          addLocalGoalToUser(goal, newUserName);
+          addLocalGoalToUser(goal, newUserName).then(() => {
+            window.localStorage.removeItem("21_local_goal")
+          })
         }
     }
   };

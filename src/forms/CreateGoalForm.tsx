@@ -20,25 +20,28 @@ type GoalCreateFormState = {
   startDate: string;
 };
 type LocalGoalAttributes = {
-  name: string,
-  type: "goal",
-  owner: string,
-  status: GoalStatus,
-  startDate: string,
-  createdAt: string,
-  daysCompleted?: string[]|null
-}
+  name: string;
+  type: "goal";
+  owner: string;
+  status: GoalStatus;
+  startDate: string;
+  createdAt: string;
+  daysCompleted?: string[] | null;
+};
 
 export const CreateGoalForm = () => {
-  const [localGoal, setLocalGoal] = useLocalStorage<LocalGoalAttributes>("21ey_local_goal", {
-    name: "",
-    type: "goal",
-    owner: "local_owner",
-    status: GoalStatus.ACTIVE,
-    startDate: "",
-    createdAt: "",
-    daysCompleted: []
-  });
+  const [localGoal, setLocalGoal] = useLocalStorage<LocalGoalAttributes>(
+    "21ey_local_goal",
+    {
+      name: "",
+      type: "goal",
+      owner: "local_owner",
+      status: GoalStatus.ACTIVE,
+      startDate: "",
+      createdAt: "",
+      daysCompleted: [],
+    },
+  );
   const initialState: GoalCreateFormState = {
     goalName: "",
     startDate: dayjs().toISOString().split("T")[1],
@@ -68,14 +71,14 @@ export const CreateGoalForm = () => {
     }
   };
   const addLocalGoal = () => {
-    const goal:LocalGoalAttributes = {
+    const goal: LocalGoalAttributes = {
       name: goalState.goalName,
       type: "goal",
       owner: "local_owner",
       status: GoalStatus.ACTIVE,
       startDate: goalState.startDate,
       createdAt: dayjs().toISOString(),
-      daysCompleted: []
+      daysCompleted: [],
     };
     setLocalGoal(goal);
   };
@@ -84,7 +87,7 @@ export const CreateGoalForm = () => {
   };
 
   return (
-    <div style={{ display: "flex", maxWidth: "600px" }}>
+    <div style={{ display: "flex", width: "100%" }}>
       <Formik
         initialValues={{ goalName: "", startDate: dayjs() }}
         validationSchema={CreateGoalFormSchema}
@@ -92,13 +95,13 @@ export const CreateGoalForm = () => {
           if (state.user) {
             addGoal();
           } else {
-            addLocalGoal()
+            addLocalGoal();
           }
         }}
       >
         {({ handleChange }) => {
           return (
-            <Form className="d-flex flex-column">
+            <Form className="d-flex flex-column w-100">
               <Field
                 id="goalName"
                 type="text"
@@ -111,9 +114,7 @@ export const CreateGoalForm = () => {
                 }}
                 style={{ margin: "6px 0" }}
               />
-              <label htmlFor="startDate">
-                When do you want to start your new habit?
-              </label>
+              <label htmlFor="startDate">When do you want to start?</label>
               <Field
                 id="stateDate"
                 type="date"

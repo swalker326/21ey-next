@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "../styles/Home.module.css";
-import dayjs from "dayjs";
 import GoalOverview from "../src/components/GoalOverview";
 import { useAppContext } from "../src/context/state";
 import { CreateGoalForm } from "../src/forms/CreateGoalForm";
@@ -84,18 +83,39 @@ const Home: NextPage = () => {
         ) : (
           <Container>
             <Col>
-              <Row className="justify-content-center">
-                <h3 className="mx-5 my-5">
-                  No Goals, slacker! Fill out the form below to create a goal
-                  and start tracking your progress.
-                </h3>
-                <div
-                  className="d-flex justify-content-around"
-                  style={{ width: "70%" }}
-                >
-                  <CreateGoalForm />
-                  <div style={{ width: 70, height: 170 }}>
-                    <Flex />
+              <Row>
+                <div className="d-flex justify-content-around">
+                  <div style={{ padding: "1rem" }}>
+                    <h3 className="mb-5">No Goals... slacker!</h3>
+                    <div className="d-flex" style={{ width: "100%" }}>
+                      <div>
+                        <h4>Its Simple</h4>
+                        <ul style={{ width: "80%" }}>
+                          <li>Create a goal</li>
+                          <li>Mark the goal completed when you complete it</li>
+                        </ul>
+                        <p
+                          className="text-secondary"
+                          style={{ fontWeight: 400, fontSize: "12px" }}
+                        >
+                          *Create an account to track your goal across multiple
+                          devices
+                        </p>
+                      </div>
+                      <div
+                        style={{
+                          width: 70,
+                          height: 170,
+                        }}
+                      >
+                        <Flex />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{ marginTop: "1rem", width: "50%", padding: "1rem" }}
+                  >
+                    <CreateGoalForm />
                   </div>
                 </div>
               </Row>
