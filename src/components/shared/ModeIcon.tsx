@@ -7,7 +7,7 @@ import React, { ForwardedRef, ForwardRefExoticComponent } from "react";
 import { useAppContext } from "../../context/state";
 
 export const ModeIcon = React.forwardRef<HTMLAnchorElement, FontAwesomeIconProps>((props, ref) => {
-  const theme = useAppContext();
+  const state = useAppContext();
   return (
     <a ref={ref} href={props.href} className={props.className}>
       <FontAwesomeIcon
@@ -16,7 +16,7 @@ export const ModeIcon = React.forwardRef<HTMLAnchorElement, FontAwesomeIconProps
         size={props.size}
         icon={props.icon}
         color={
-          props.color ? props.color : theme.mode === "dark" ? "light" : "dark"
+          props.color ? props.color : state.theme.colorMode === "dark" ? "light" : "dark"
         }
       />
     </a>
