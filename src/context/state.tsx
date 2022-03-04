@@ -16,6 +16,7 @@ import { createGoal } from "../graphql/mutations";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import dayjs from "dayjs";
 import { listGoalsBySpecificOwner } from "../graphql/queries";
+import { useRouter } from "next/router";
 
 type ColorMode = "light" | "dark";
 
@@ -56,7 +57,7 @@ type AppState = {
     activeGoal: Goal | null;
     setActiveGoal: Dispatch<SetStateAction<Goal | null>>;
     localGoal: Goal | null;
-    setLocalGoal: (goal:Goal) => void;
+    setLocalGoal: (goal: Goal) => void;
     createGoal: (goal: Goal) => void;
     addGoal: (
       { name, startDate }: AddGoalProps,
@@ -76,6 +77,7 @@ export function useAppContext() {
 }
 
 export const AppWrapper: FC = ({ children }) => {
+  const router = useRouter();
   const [user, setUser] = useState<CognitoUserAmplify | null>(null);
   const [mode, setMode] = useState<"dark" | "light">("light");
   const [loading, setLoading] = useState(true);
@@ -86,6 +88,7 @@ export const AppWrapper: FC = ({ children }) => {
     null,
   );
   useEffect(() => {
+    console.log("state useEffect fired");
     const getCurrentUser = async () => {
       try {
         const currentUser = await Auth.currentAuthenticatedUser();
@@ -106,53 +109,52 @@ export const AppWrapper: FC = ({ children }) => {
       }
     };
     getCurrentUser();
+    Hub.listen("auth", (data) => {
+      const { payload } = data;
+      onAuthEvent(payload);
+    });
   }, []);
 
   const onAuthEvent = (payload: HubPayload) => {
     console.log("On Auth Payload: ", payload);
     switch (payload.event) {
       case "signOut":
-        console.log("Sign out Event");
+        console.log("Sign out Event fired");
         setUser(null);
         setFormState("signIn");
         setActiveGoal(null);
         break;
       case "signIn":
-        console.log("Sign in Case ON AUTH");
+        console.log("Sign in Event fired");
+        setUser(user);
         if (localGoal) {
           const newUserName = payload.data.username.toString();
           addLocalGoalToUser(localGoal, newUserName).then(() => {
             setLocalGoal(null);
           });
         } else {
-          fetchGoals();
+          fetchGoals(payload.data);
         }
     }
   };
 
-  Hub.listen("auth", (data) => {
-    const { payload } = data;
-    onAuthEvent(payload);
-  });
-
   const signOut = async () => {
     Auth.signOut().then(() => {
-      setUser(null);
       setFormState("signIn");
     });
   };
 
   const signIn = async (user: string, password: string) => {
     Auth.signIn(user, password)
-      .then((user) => {
-        setUser(user);
+      .then(() => {
         setFormState("signedIn");
+        router.push("/");
       })
       .catch((error) => console.log("Error Signing In: " + error));
   };
 
   const addGoal = async (
-    { name, startDate}: AddGoalProps,
+    { name, startDate }: AddGoalProps,
     isLocal = false,
   ) => {
     const goal = {
@@ -170,28 +172,41 @@ export const AppWrapper: FC = ({ children }) => {
     setActiveGoal(goal);
   };
 
-  const fetchGoals = async (passedUser?: CognitoUserAmplify) => {
+  const fetchGoals = async (passedUser: CognitoUserAmplify) => {
     try {
       const goalData = (await API.graphql(
         graphqlOperation(listGoalsBySpecificOwner, {
-          owner: user?.username?.toString() || passedUser?.username,
+          owner: passedUser?.username || user?.username?.toString(),
         }),
       )) as { data: ListGoalsBySpecificOwnerQuery };
-      const fetchedGoal: Goal = {
-        id: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.id,
-        name: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.name,
-        type: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.type,
-        owner: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.owner,
-        status: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.status,
-        startDate:
-          goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.startDate,
-        createdAt:
-          goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.createdAt,
-        daysCompleted:
-          goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.daysCompleted,
-      };
-      setActiveGoal(fetchedGoal);
-      console.log("setActiveGoal to : ", fetchedGoal);
+      console.log(
+        "GoalData? :",
+        goalData.data?.listGoalsBySpecificOwner?.items &&
+          goalData.data.listGoalsBySpecificOwner.items.length > 0,
+      );
+      if (
+        goalData.data.listGoalsBySpecificOwner?.items &&
+        goalData.data.listGoalsBySpecificOwner.items.length > 0
+      ) {
+        const fetchedGoal: Goal = {
+          id: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.id,
+          name: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.name,
+          type: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.type,
+          owner: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.owner,
+          status: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.status,
+          startDate:
+            goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.startDate,
+          createdAt:
+            goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.createdAt,
+          daysCompleted:
+            goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.daysCompleted,
+        };
+        setActiveGoal(fetchedGoal);
+        console.log("setActiveGoal to : ", fetchedGoal);
+      } else {
+        setActiveGoal(null);
+        console.log("No Local Goal or stored goal found, create one");
+      }
       setLoading(false);
     } catch (error) {
       console.log("Error fetching goals", error);

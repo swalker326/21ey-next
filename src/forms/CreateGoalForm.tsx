@@ -1,19 +1,9 @@
-import {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, useState } from "react";
 import dayjs from "dayjs";
 import { Form, Field, Formik } from "formik";
 import { date, object, string } from "yup";
 import { ModeButton } from "../components/shared/ModeButton";
-import { API, graphqlOperation } from "aws-amplify";
-import { createGoal } from "../graphql/mutations";
-import { Goal, useAppContext } from "../context/state";
-import { GoalStatus } from "../API";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useAppContext } from "../context/state";
 
 type GoalCreateFormState = {
   goalName: string;
@@ -41,7 +31,10 @@ export const CreateGoalForm = () => {
         initialValues={{ goalName: "" }}
         validationSchema={CreateGoalFormSchema}
         onSubmit={async (values, { setSubmitting }) => {
-          const newGoal = { name: values.goalName, startDate: dayjs().format("YYYY-MM-DD") };
+          const newGoal = {
+            name: values.goalName,
+            startDate: dayjs().format("YYYY-MM-DD"),
+          };
           if (state.auth.user) {
             state.data.addGoal(newGoal);
           } else {

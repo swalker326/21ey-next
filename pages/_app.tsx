@@ -1,6 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/globals.css";
-import { useEffect, useState } from "react";
 import { AppWrapper, useAppContext } from "../src/context/state";
 import type { AppProps } from "next/app";
 import Amplify, { Auth } from "aws-amplify";
