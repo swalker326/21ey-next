@@ -16,18 +16,18 @@ export const AppNavBar = () => {
   const router = useRouter();
 
   const handleSwitchChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    state.setMode(evt.target.checked ? "light" : "dark");
+    state.theme.setColorMode(evt.target.checked ? "light" : "dark");
   };
 
   const handleSignoutClick = () => {
-    state.user ? state.signOut() : router.push("/profile");
+    state.auth.user ? state.auth.signOut() : router.push("/profile");
   };
 
   return (
-    <Navbar bg={state.mode} variant={state.mode}>
+    <Navbar bg={state.theme.colorMode} variant={state.theme.colorMode}>
       <Container
         className={`Header ${
-          state.mode === "dark" ? "bg-dark text-light" : "bg-light text-dark"
+          state.theme.colorMode === "dark" ? "bg-dark text-light" : "bg-light text-dark"
         }`}
       >
         <Nav className="w-100">
@@ -45,7 +45,7 @@ export const AppNavBar = () => {
                 onChange={handleSwitchChange}
                 className="darkmode-switch"
                 type="switch"
-                checked={state.mode === "dark" ? false : true}
+                checked={state.theme.colorMode === "dark" ? false : true}
                 id="custom-switch"
                 label={<ModeIcon color="#666" icon={faCircleHalfStroke} />}
                 style={{ marginRight: 9 }}

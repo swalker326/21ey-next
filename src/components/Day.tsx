@@ -6,9 +6,10 @@ import { updateGoal } from "../graphql/mutations";
 import { API, graphqlOperation } from "aws-amplify";
 import { GraphQLResult } from "@aws-amplify/api-graphql";
 import { Observable } from "zen-observable-ts";
-import { OnUpdateGoalSubscription } from "../API";
+import { GoalStatus, OnUpdateGoalSubscription } from "../API";
 import { onUpdateGoal } from "../graphql/subscriptions";
 import { useAppContext } from "../context/state";
+import { stat } from "fs";
 
 type DayProps = {
   id: string | undefined | null;
@@ -18,7 +19,6 @@ type DayProps = {
   daysCompleted: (string | null)[] | undefined | null;
   setDisplayModal: Dispatch<SetStateAction<boolean>>;
   setModalData: Dispatch<SetStateAction<string | undefined>>;
-  localGoal?: object|null;
 };
 
 export const Day = ({
@@ -29,14 +29,13 @@ export const Day = ({
   daysCompleted,
   setDisplayModal,
   setModalData,
-  localGoal
 }: DayProps) => {
   const state = useAppContext();
   const isToday = date.isSame(dayjs(), "day");
   const [isCompleted, setIsCompleted] = useState(dayCompleted);
 
   useEffect(() => {
-    if (state.user?.username) {
+    if (state.auth.user?.username) {
       const pubSubClient = API.graphql(
         graphqlOperation(onUpdateGoal),
       ) as Observable<object>;
@@ -59,7 +58,18 @@ export const Day = ({
           ? [...daysCompleted, date.format("YYYY-MM-DD")]
           : [date.format("YYYY-MM-DD")],
     };
-    API.graphql(graphqlOperation(updateGoal, { input: updatedGoal }));
+    if (state.auth.user) {
+      API.graphql(graphqlOperation(updateGoal, { input: updatedGoal }));
+    } else {
+      if (state.data.activeGoal) {
+        const newLocalGoal = {
+          ...state.data.activeGoal,
+          daysCompleted: updatedGoal.daysCompleted,
+        };
+        state.data.setLocalGoal(newLocalGoal);
+        state.data.setActiveGoal(newLocalGoal);
+      }
+    }
     setIsCompleted(true);
   };
 
@@ -79,6 +89,9 @@ export const Day = ({
       setDisplayModal(true);
     }
   };
+  const dayHasPassed = date.isBefore(dayjs(), "day");
+  const accentColor = state.theme.colorMode === "dark" ? "#cccccc" : "#777777";
+  // const accentColor = state.theme.colorMode === "dark" ? "blue" : "red";
 
   return (
     <Col
@@ -86,11 +99,13 @@ export const Day = ({
       xs={3}
       sm={2}
       style={{
+        position: "relative",
         backgroundColor: isToday
           ? "#F6BE00"
-          : date.isBefore(dayjs(), "day")
+          : dayHasPassed
           ? "lightgray"
           : "none",
+        color: !dayHasPassed ? accentColor : "#777777",
         border: "1px solid gray",
         height: 100,
         //prevents double border on touching elements
@@ -106,7 +121,13 @@ export const Day = ({
           flexDirection: "column",
         }}
       >
-        {day}
+        <span
+          style={{
+            fontSize: 12,
+          }}
+        >
+          Day: {day}
+        </span>
         <div className="d-flex justify-content-center mt-2">
           {dayCompleted || isCompleted ? (
             <BlackX
@@ -117,6 +138,16 @@ export const Day = ({
             />
           ) : null}
         </div>
+      </div>
+      <div
+        style={{
+          fontSize: 12,
+          position: "absolute",
+          right: 0,
+          bottom: 0,
+        }}
+      >
+        {date.format("M/DD")}
       </div>
     </Col>
   );

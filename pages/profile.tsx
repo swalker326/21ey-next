@@ -12,8 +12,8 @@ export const Profile = () => {
       <style jsx global>
         {`
           body {
-            background-color: ${state.mode === "dark" ? "#525659" : "inhearit"};
-            color: ${state.mode === "dark" ? "#f8f9fa" : "black"};
+            background-color: ${state.theme.colorMode === "dark" ? "#525659" : "inhearit"};
+            color: ${state.theme.colorMode === "dark" ? "#f8f9fa" : "black"};
           }
         `}
       </style>
@@ -21,10 +21,10 @@ export const Profile = () => {
         style={{ width: 30, height: 30, marginLeft: "12px" }}
         color="#666"
         icon={faSignOut}
-        onClick={state.signOut}
+        onClick={state.auth.signOut}
       />
       <Container>
-        <h3>{state.user ? `Hi ${state.user.attributes?.email}` : null}</h3>
+        <h3>{state.auth.user ? `Hi ${state.auth.user.attributes?.email}` : null}</h3>
       </Container>
     </Register>
   );

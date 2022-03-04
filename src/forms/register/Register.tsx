@@ -16,14 +16,6 @@ export const Register: React.FC = ({ children }) => {
   };
   const [formInputState, setFormInputState] =
     useState<FormInputState>(initialFormValues);
-  const isAuthtenicated = async () => {
-    try {
-      const currentUser = await Auth.currentAuthenticatedUser();
-      return currentUser;
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const signup = async () => {
     try {
@@ -34,11 +26,10 @@ export const Register: React.FC = ({ children }) => {
           email: formInputState.email,
         },
       });
-      /* Once the user successfully signs up, update form state to show the confirm sign up form for MFA */
       setFormInputState({ ...formInputState });
-      state.setFormState("confirmSignUp");
+      state.auth.setRegisterFormState("confirmSignUp");
     } catch (err) {
-      console.log({ err });
+      console.error(`Error siging up: ${{ err }}`);
     }
   };
   const confirmSignUp = async () => {
@@ -47,25 +38,18 @@ export const Register: React.FC = ({ children }) => {
         formInputState.email,
         formInputState.verificationCode,
       );
-      /* Once the user successfully confirms their account, update form state to show the sign in form*/
-      setFormInputState({ ...formInputState });
-      state.setFormState("signIn");
+      setFormInputState(initialFormValues);
+      state.auth.setRegisterFormState("signIn");
     } catch (err) {
-      console.log({ err });
+      console.error(`Error confirming sign up: ${{ err }}`);
     }
   };
 
   const signin = async () => {
-    Auth.signIn(formInputState.email, formInputState.password)
-      .then((user) => {
-        setFormInputState({ ...formInputState });
-        state.setUser(user);
-        state.setFormState("signedIn");
-      })
-      .catch((error) => console.log(error));
+    state.auth.signIn(formInputState.email, formInputState.password);
   };
 
-  if (state.formState === "signUp")
+  if (state.auth.registerFormState === "signUp")
     return (
       <SignUpForm
         formInputState={formInputState}
@@ -73,7 +57,7 @@ export const Register: React.FC = ({ children }) => {
         formSubmit={signup}
       />
     );
-  if (state.formState === "signIn")
+  if (state.auth.registerFormState === "signIn")
     return (
       <SignInForm
         formInputState={formInputState}
@@ -81,7 +65,7 @@ export const Register: React.FC = ({ children }) => {
         formSubmit={signin}
       />
     );
-  if (state.formState === "confirmSignUp")
+  if (state.auth.registerFormState === "confirmSignUp")
     return (
       <ConfirmSignUpForm
         formInputState={formInputState}

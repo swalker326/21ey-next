@@ -6,49 +6,31 @@ import styles from "../styles/Home.module.css";
 import GoalOverview from "../src/components/GoalOverview";
 import { useAppContext } from "../src/context/state";
 import { CreateGoalForm } from "../src/forms/CreateGoalForm";
-import { API, graphqlOperation, Auth } from "aws-amplify";
-import { listGoalsBySpecificOwner } from "../src/graphql/queries";
 import { ListGoalsBySpecificOwnerQuery, Goal } from "../src/API";
 import { Loader } from "@aws-amplify/ui-react";
 import Flex from "../public/Flex.svg";
 
 const Home: NextPage = () => {
   const state = useAppContext();
-  const [goals, setGoals] = useState<ListGoalsBySpecificOwnerQuery | null>();
-  const [loading, setLoading] = useState(true);
   let localGoalString;
-  if (typeof window !== "undefined" && !state.user) {
+  if (typeof window !== "undefined" && !state.auth.user) {
     localGoalString = window.localStorage.getItem("21ey_local_goal");
   }
   const localGoal = localGoalString && JSON.parse(localGoalString);
 
-  const fetchGoals = async () => {
-    console.log("Fetch Goals Fired");
-    try {
-      const goalData = (await API.graphql(
-        graphqlOperation(listGoalsBySpecificOwner, {
-          owner: state?.user?.username?.toString(),
-        }),
-      )) as { data: ListGoalsBySpecificOwnerQuery };
-      setGoals(goalData.data);
-      setLoading(false);
-    } catch (err) {
-      setGoals(null);
-    }
-  };
-  useEffect(() => {
-    Auth.currentAuthenticatedUser()
-      .then((user) => {
-        state.setUser(user);
-      })
-      .catch((error) => {
-        state.setUser(null);
-        setLoading(false);
-      });
-  }, []);
-  useEffect(() => {
-    fetchGoals();
-  }, [state.user]);
+  // useEffect(() => {
+  //   Auth.currentAuthenticatedUser()
+  //     .then((user) => {
+  //       state.auth.setUser(user);
+  //     })
+  //     .catch((error) => {
+  //       state.auth.setUser(null);
+  //       setLoading(false);
+  //     });
+  // }, []);
+  // useEffect(() => {
+  //   fetchGoals();
+  // }, [state.auth.user]);
   return (
     <div className={styles.container}>
       <Head>
@@ -65,22 +47,16 @@ const Home: NextPage = () => {
         <style jsx global>
           {`
             body {
-              background-color: ${state.mode === "dark"
+              background-color: ${state.theme.colorMode === "dark"
                 ? "#525659"
                 : "inhearit"};
-              color: ${state.mode === "dark" ? "#f8f9fa" : "black"};
+              color: ${state.theme.colorMode === "dark" ? "#f8f9fa" : "black"};
             }
           `}
         </style>
-        {loading ? (
+        {state.loading ? (
           <Loader />
-        ) : goals?.listGoalsBySpecificOwner?.items?.[0] || localGoal ? (
-          localGoal ? (
-            <GoalOverview goal={localGoal} />
-          ) : (
-            <GoalOverview goal={goals?.listGoalsBySpecificOwner?.items?.[0]} />
-          )
-        ) : (
+        ) : (state.data.activeGoal ? <GoalOverview /> :
           <Container>
             <Col>
               <Row>

@@ -2,15 +2,22 @@ import { FC, useState } from "react";
 import { Col, Container, Modal, Row } from "react-bootstrap";
 import dayjs, { Dayjs } from "dayjs";
 import { Day } from "./Day";
-import { Goal }  from "../API";
+import { Goal } from "../API";
 import { ModeButton } from "./shared/ModeButton";
 import { useAppContext } from "../context/state";
-type GoalsOverViewProps = {
-  goal: Goal
-}
-const GoalOverview:FC<GoalsOverViewProps> = ({goal}) => {
-  const {id, name, startDate, daysCompleted} = goal
+
+const GoalOverview: FC = () => {
   const state = useAppContext();
+  const goal = state.data.activeGoal
+    ? state.data.activeGoal
+    : state.data.localGoal;
+  let id: string | null | undefined,
+    name: string | undefined,
+    startDate: string | undefined | null,
+    daysCompleted: (string | null)[] | null | undefined;
+  if (goal) {
+    ({ name, startDate, daysCompleted, id } = goal);
+  }
   const startDateObj = dayjs(startDate);
   const endDate = startDateObj.add(21, "days");
   const days = Array.from(Array(endDate.diff(startDateObj, "days")).keys());
@@ -23,14 +30,18 @@ const GoalOverview:FC<GoalsOverViewProps> = ({goal}) => {
     console.log("Fired Handle Close");
     setDisplayModal(false);
   };
-  const isDayCompleted = (date:Dayjs) => {
-    const daysArray = daysCompleted && daysCompleted.length > 0 && daysCompleted.map(d => dayjs(d))
-    let completed = false
-    daysArray && daysArray.forEach(d => {
-      if (d.isSame(date, "day")) completed = true
-    })
-    return completed
-  }
+  const isDayCompleted = (date: Dayjs) => {
+    const daysArray =
+      daysCompleted &&
+      daysCompleted.length > 0 &&
+      daysCompleted.map((d) => dayjs(d));
+    let completed = false;
+    daysArray &&
+      daysArray.forEach((d) => {
+        if (d.isSame(date, "day")) completed = true;
+      });
+    return completed;
+  };
   return (
     <Container className="CurrentGoal">
       <h2>{name}</h2>
@@ -45,20 +56,22 @@ const GoalOverview:FC<GoalsOverViewProps> = ({goal}) => {
                 <Day
                   id={id}
                   daysCompleted={daysCompleted}
-                  dayCompleted = {isDayCompleted(date)}
+                  dayCompleted={isDayCompleted(date)}
                   setModalData={setModalData}
                   key={index}
                   date={date}
                   day={index + 1}
                   setDisplayModal={setDisplayModal}
-                  localGoal={state.user ? goal : null}
                 />
               );
             })}
           </Row>
         </Container>
       </Container>
-      <Modal show={displayModal} onHide={handleClose}>
+      <Modal
+        show={displayModal}
+        onHide={handleClose}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Hold Up</Modal.Title>
         </Modal.Header>
