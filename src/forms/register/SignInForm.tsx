@@ -79,7 +79,7 @@ export const SignInForm = ({
                   <ModeButton
                     onClick={() => state.auth.setRegisterFormState("signUp")}
                     variant="outline-dark"
-                    type="submit"
+                    type="button"
                     className="mt-4"
                   >
                     Create Account
