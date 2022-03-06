@@ -1,10 +1,10 @@
 import { ChangeEvent, useState } from "react";
 import dayjs from "dayjs";
-import { Form, Field, Formik } from "formik";
-import { date, object, string } from "yup";
-import { Spinner, Container } from "react-bootstrap";
+import { Form, Formik } from "formik";
+import { object, string } from "yup";
 import { ModeButton } from "../components/shared/ModeButton";
 import { useAppContext } from "../context/state";
+import { ValidatedFormField } from "../components/shared/ValidatedFormField";
 
 type GoalCreateFormState = {
   goalName: string;
@@ -18,8 +18,7 @@ export const CreateGoalForm = () => {
   const state = useAppContext();
   const [goalState, setGoalState] = useState<GoalCreateFormState>(initialState);
   const CreateGoalFormSchema = object().shape({
-    goalName: string(),
-    startDate: date(),
+    goalName: string().required("You have to call it something"),
   });
 
   const onChangeState = (e: ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +52,7 @@ export const CreateGoalForm = () => {
         {({ handleChange }) => {
           return (
             <Form className="d-flex flex-column w-100">
-              <Field
+              <ValidatedFormField
                 id="goalName"
                 type="text"
                 name="goalName"
@@ -63,7 +62,7 @@ export const CreateGoalForm = () => {
                   handleChange(event);
                   onChangeState(event);
                 }}
-                style={{ margin: "6px 0" }}
+                style={{ margin: "6px 0", width: "100%" }}
               />
               <div className="d-flex justify-content-end">
                 <ModeButton type="submit">Add</ModeButton>

@@ -2,9 +2,10 @@ import React, { ChangeEvent } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { ModeButton } from "../../components/shared/ModeButton";
 import { RegisterFormProps } from "./@types";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import { object, string } from "yup";
 import { useAppContext } from "../../context/state";
+import { ValidatedFormField } from "../../components/shared/ValidatedFormField";
 
 export const SignInForm = ({
   setFormInputState,
@@ -14,9 +15,10 @@ export const SignInForm = ({
   const state = useAppContext();
   const SignUpFormSchema = object().shape({
     email: string().email("Invalid email address format").required("Required"),
-    password: string(),
+    password: string().required(),
   });
   const onChangeStateUpdate = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log('Hi')
     setFormInputState({ ...formInputState, [e.target.name]: e.target.value });
   };
   return (
@@ -36,7 +38,7 @@ export const SignInForm = ({
             setSubmitting(false);
           }}
         >
-          {({ handleChange }) => {
+          {({ handleChange, touched, errors }) => {
             return (
               <Form style={{ maxWidth: "500px" }}>
                 <div
@@ -46,9 +48,8 @@ export const SignInForm = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Field
-                    type="email"
-                    id="email"
+                  <ValidatedFormField
+                    label="email"
                     name="email"
                     value={formInputState.email}
                     placeholder="Enter email"
@@ -56,11 +57,11 @@ export const SignInForm = ({
                       handleChange(event);
                       onChangeStateUpdate(event);
                     }}
-                    style={{ margin: "6px 0" }}
+                    style={{ margin: "6px 0", width: "100%" }}
                   />
 
-                  <Field
-                    id="password"
+                  <ValidatedFormField
+                    label=""
                     type="password"
                     name="password"
                     value={formInputState.password}
@@ -69,7 +70,7 @@ export const SignInForm = ({
                       handleChange(event);
                       onChangeStateUpdate(event);
                     }}
-                    style={{ margin: "6px 0" }}
+                    style={{ margin: "6px 0", width: "100%" }}
                   />
                 </div>
                 <div className="d-flex justify-content-between">

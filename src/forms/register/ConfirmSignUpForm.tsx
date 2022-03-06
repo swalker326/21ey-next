@@ -4,6 +4,7 @@ import { Formik, Form, Field } from "formik";
 import { object, string } from "yup";
 import { ModeButton } from "../../components/shared/ModeButton";
 import { RegisterFormProps } from "./@types";
+import { ValidatedFormField } from "../../components/shared/ValidatedFormField";
 
 export const ConfirmSignUpForm = ({
   formInputState,
@@ -43,7 +44,7 @@ export const ConfirmSignUpForm = ({
                     marginLeft: 0,
                   }}
                 >
-                  <Field
+                  <ValidatedFormField
                     id="verificationCode"
                     type="text"
                     name="verificationCode"
@@ -53,7 +54,7 @@ export const ConfirmSignUpForm = ({
                       handleChange(event);
                       onChangeStateUpdate(event);
                     }}
-                    style={{ margin: "6px 0" }}
+                    style={{ margin: "6px 0", width: "100%" }}
                   />
                 </div>
                 <ModeButton type="submit" className="mt-4">

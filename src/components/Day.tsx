@@ -4,7 +4,8 @@ import { Col } from "react-bootstrap";
 import BlackX from "./shared/BlackXSvg";
 import { updateGoal } from "../graphql/mutations";
 import { API, graphqlOperation } from "aws-amplify";
-import { useAppContext } from "../context/state";
+import { Goal, useAppContext } from "../context/state";
+import { UpdateGoalMutation } from "../API";
 
 type DayProps = {
   day: number;
@@ -34,7 +35,25 @@ export const Day = ({
           : [date.format("YYYY-MM-DD")],
     };
     if (state.auth.user) {
-      API.graphql(graphqlOperation(updateGoal, { input: updatedGoal }));
+      console.log("user detected");
+      API.graphql(graphqlOperation(updateGoal, { input: updatedGoal })).then(
+        ({ data: { updateGoal } }: { data: UpdateGoalMutation }) => {
+          if (updateGoal) {
+            const newGoal: Goal = {
+              id: updateGoal.id,
+              owner: updateGoal.owner,
+              type: updateGoal.type,
+              name: updateGoal.name,
+              daysCompleted: updateGoal.daysCompleted,
+              createdAt: updateGoal.createdAt,
+              startDate: updateGoal.startDate,
+              status: updateGoal.status,
+            };
+            console.log("newGoal: ", newGoal);
+            state.data.setActiveGoal(newGoal);
+          }
+        },
+      );
     } else {
       if (state.data.activeGoal) {
         const newLocalGoal = {

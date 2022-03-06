@@ -5,6 +5,7 @@ import { Formik, Form, Field } from "formik";
 import { object, string } from "yup";
 import { ModeButton } from "../../components/shared/ModeButton";
 import { useAppContext } from "../../context/state";
+import { ValidatedFormField } from "../../components/shared/ValidatedFormField";
 
 export const SignUpForm = ({
   formInputState,
@@ -52,7 +53,7 @@ export const SignUpForm = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Field
+                  <ValidatedFormField
                     type="email"
                     id="email"
                     name="email"
@@ -62,10 +63,10 @@ export const SignUpForm = ({
                       handleChange(event);
                       onChangeStateUpdate(event);
                     }}
-                    style={{ margin: "6px 0" }}
+                    style={{ margin: "6px 0", width: "100%" }}
                   />
 
-                  <Field
+                  <ValidatedFormField
                     id="password"
                     type="password"
                     name="password"
@@ -75,7 +76,7 @@ export const SignUpForm = ({
                       handleChange(event);
                       onChangeStateUpdate(event);
                     }}
-                    style={{ margin: "6px 0" }}
+                    style={{ margin: "6px 0", width: "100%" }}
                   />
                 </div>
                 <div className="d-flex justify-content-between">
