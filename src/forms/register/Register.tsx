@@ -48,6 +48,24 @@ export const Register: React.FC = ({ children }) => {
   const signin = async () => {
     state.auth.signIn(formInputState.email, formInputState.password);
   };
+  const FormWrapper: React.FC = ({ children }) => {
+    return (
+      <Container
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          // width: "80%",
+          height: "20rem",
+          backgroundColor: "#F6BE00",
+          marginTop: "1rem",
+          borderRadius: "12px",
+        }}
+      >
+        {children}
+      </Container>
+    );
+  };
 
   if (state.auth.registerFormState === "signUp")
     return (
@@ -73,5 +91,9 @@ export const Register: React.FC = ({ children }) => {
         formSubmit={confirmSignUp}
       />
     );
-  return <Container fluid>{children}</Container>;
+  return (
+    <Container fluid className="hi there">
+      <div className="register">{children}</div>
+    </Container>
+  );
 };

@@ -5,12 +5,12 @@ import styles from "../styles/Home.module.css";
 import GoalOverview from "../src/components/GoalOverview";
 import { useAppContext } from "../src/context/state";
 import { CreateGoalForm } from "../src/forms/CreateGoalForm";
-import { Loader } from "@aws-amplify/ui-react";
 import Flex from "../public/Flex.svg";
+import { Loader } from "../src/components/shared/Loader";
 
 const Home: NextPage = () => {
   const state = useAppContext();
-  
+
   return (
     <div className={styles.container}>
       <Head>
@@ -34,50 +34,60 @@ const Home: NextPage = () => {
             }
           `}
         </style>
-        {state.loading ? (
-          <Loader />
-        ) : (state.data.activeGoal ? <GoalOverview /> :
-          <Container>
-            <Col>
+        <Loader>
+          {state.data.activeGoal ? (
+            <GoalOverview />
+          ) : (
+            <Container>
+              <Loader />
               <Row>
-                <div className="d-flex justify-content-around">
-                  <div style={{ padding: "1rem" }}>
-                    <h3 className="mb-5">No Goals... slacker!</h3>
-                    <div className="d-flex" style={{ width: "100%" }}>
-                      <div>
-                        <h4>Its Simple</h4>
-                        <ul style={{ width: "80%" }}>
-                          <li>Create a goal</li>
-                          <li>Mark the goal completed when you complete it</li>
-                        </ul>
-                        <p
-                          className="text-secondary"
-                          style={{ fontWeight: 400, fontSize: "12px" }}
-                        >
-                          *Create an account to track your goal across multiple
-                          devices
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          width: 70,
-                          height: 170,
-                        }}
+                <Col sm={12} md={6} style={{ padding: "1rem" }}>
+                  <h1 className="my-4">
+                    Make New Habits in{" "}
+                    <span style={{ color: "#F6BE00" }}>21</span> days
+                  </h1>
+                  <div className="d-flex" style={{ width: "100%" }}>
+                    <div
+                      className="d-sm-none d-lg-flex"
+                      style={{
+                        width: 100,
+                        height: 170,
+                      }}
+                    >
+                      <Flex />
+                    </div>
+                    <div>
+                      <h5>Its Simple</h5>
+                      <ul>
+                        <li>Create a goal</li>
+                        <li>
+                          Mark the goal completed everyday once you complete it
+                        </li>
+                        <li>
+                          At the end of the 21 days you will instinctively do it
+                        </li>
+                      </ul>
+                      <p
+                        className="text-secondary"
+                        style={{ fontWeight: 400, fontSize: "12px" }}
                       >
-                        <Flex />
-                      </div>
+                        *Create an account to track your goal across multiple
+                        devices
+                      </p>
                     </div>
                   </div>
-                  <div
-                    style={{ marginTop: "1rem", width: "50%", padding: "1rem" }}
-                  >
-                    <CreateGoalForm />
-                  </div>
-                </div>
+                </Col>
+                <Col
+                  sm={12}
+                  md={6}
+                  style={{ marginTop: "1rem", padding: "1rem" }}
+                >
+                  <CreateGoalForm />
+                </Col>
               </Row>
-            </Col>
-          </Container>
-        )}
+            </Container>
+          )}
+        </Loader>
       </Container>
     </div>
   );

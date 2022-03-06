@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import dayjs from "dayjs";
 import { Form, Field, Formik } from "formik";
 import { date, object, string } from "yup";
+import { Spinner, Container } from "react-bootstrap";
 import { ModeButton } from "../components/shared/ModeButton";
 import { useAppContext } from "../context/state";
 
@@ -26,7 +27,14 @@ export const CreateGoalForm = () => {
   };
 
   return (
-    <div style={{ display: "flex", width: "100%" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        width: "100%",
+        height: "100%",
+      }}
+    >
       <Formik
         initialValues={{ goalName: "" }}
         validationSchema={CreateGoalFormSchema}
