@@ -1,8 +1,7 @@
 import { FC, useState } from "react";
-import { Col, Container, Modal, Row } from "react-bootstrap";
+import { Container, Modal, Row } from "react-bootstrap";
 import dayjs, { Dayjs } from "dayjs";
 import { Day } from "./Day";
-import { Goal } from "../API";
 import { ModeButton } from "./shared/ModeButton";
 import { useAppContext } from "../context/state";
 
@@ -18,14 +17,15 @@ const GoalOverview: FC = () => {
   if (goal) {
     ({ name, startDate, daysCompleted, id } = goal);
   }
-  const startDateObj = dayjs(startDate);
-  const endDate = startDateObj.add(21, "days");
-  const days = Array.from(Array(endDate.diff(startDateObj, "days")).keys());
+  const daysArray = Array.from(Array(21).keys()).map((i) => {
+    return {
+      day: i + 1,
+      date: i === 0 ? dayjs(startDate) : dayjs(startDate).add(i, "day"),
+    };
+  });
+
   const [displayModal, setDisplayModal] = useState<boolean>(false);
   const [modalData, setModalData] = useState<string | undefined>(undefined);
-  const daysAsDates = days.map((index) => {
-    return index === 0 ? startDateObj : startDateObj.add(index, "day");
-  });
   const handleClose = () => {
     console.log("Fired Handle Close");
     setDisplayModal(false);
@@ -47,20 +47,18 @@ const GoalOverview: FC = () => {
       <h2>{name}</h2>
       <Container className="Goal">
         <h4 style={{ color: "gray", fontWeight: 200 }}>
-          Started {startDateObj.format("MM/DD/YY")}
+          {/* Started {startDateObj.format("MM/DD/YY")} */}
         </h4>
         <Container>
           <Row>
-            {daysAsDates.map((date: Dayjs, index: number) => {
+            {daysArray.map(({ date, day }) => {
               return (
                 <Day
-                  id={id}
-                  daysCompleted={daysCompleted}
-                  dayCompleted={isDayCompleted(date)}
-                  setModalData={setModalData}
-                  key={index}
+                  key={day}
                   date={date}
-                  day={index + 1}
+                  day={day}
+                  isCompleted={isDayCompleted(date)}
+                  setModalData={setModalData}
                   setDisplayModal={setDisplayModal}
                 />
               );
@@ -68,10 +66,7 @@ const GoalOverview: FC = () => {
           </Row>
         </Container>
       </Container>
-      <Modal
-        show={displayModal}
-        onHide={handleClose}
-      >
+      <Modal show={displayModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Hold Up</Modal.Title>
         </Modal.Header>

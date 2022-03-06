@@ -1,61 +1,36 @@
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { Col } from "react-bootstrap";
 import BlackX from "./shared/BlackXSvg";
 import { updateGoal } from "../graphql/mutations";
 import { API, graphqlOperation } from "aws-amplify";
-import { GraphQLResult } from "@aws-amplify/api-graphql";
-import { Observable } from "zen-observable-ts";
-import { GoalStatus, OnUpdateGoalSubscription } from "../API";
-import { onUpdateGoal } from "../graphql/subscriptions";
 import { useAppContext } from "../context/state";
-import { stat } from "fs";
 
 type DayProps = {
-  id: string | undefined | null;
   day: number;
   date: Dayjs;
-  dayCompleted: boolean;
-  daysCompleted: (string | null)[] | undefined | null;
+  isCompleted: boolean;
   setDisplayModal: Dispatch<SetStateAction<boolean>>;
   setModalData: Dispatch<SetStateAction<string | undefined>>;
 };
 
 export const Day = ({
-  id,
   day,
   date,
-  dayCompleted,
-  daysCompleted,
-  setDisplayModal,
+  isCompleted,
   setModalData,
+  setDisplayModal,
 }: DayProps) => {
   const state = useAppContext();
   const isToday = date.isSame(dayjs(), "day");
-  const [isCompleted, setIsCompleted] = useState(dayCompleted);
-
-  useEffect(() => {
-    if (state.auth.user?.username) {
-      const pubSubClient = API.graphql(
-        graphqlOperation(onUpdateGoal),
-      ) as Observable<object>;
-      const subscription = pubSubClient.subscribe({
-        next: (value: GraphQLResult<OnUpdateGoalSubscription>) => {
-          console.log(value);
-        },
-      });
-      return () => {
-        subscription.unsubscribe();
-      };
-    }
-  }, []);
 
   const updateGoalDailyCompletion = () => {
     const updatedGoal = {
-      id,
+      id: state.data.activeGoal?.id,
       daysCompleted:
-        daysCompleted && daysCompleted.length > 1
-          ? [...daysCompleted, date.format("YYYY-MM-DD")]
+        state.data.activeGoal?.daysCompleted &&
+        state.data.activeGoal.daysCompleted?.length > 0
+          ? [...state.data.activeGoal.daysCompleted, date.format("YYYY-MM-DD")]
           : [date.format("YYYY-MM-DD")],
     };
     if (state.auth.user) {
@@ -70,7 +45,6 @@ export const Day = ({
         state.data.setActiveGoal(newLocalGoal);
       }
     }
-    setIsCompleted(true);
   };
 
   const handleDayClick = () => {
@@ -91,7 +65,6 @@ export const Day = ({
   };
   const dayHasPassed = date.isBefore(dayjs(), "day");
   const accentColor = state.theme.colorMode === "dark" ? "#cccccc" : "#777777";
-  // const accentColor = state.theme.colorMode === "dark" ? "blue" : "red";
 
   return (
     <Col
@@ -105,7 +78,7 @@ export const Day = ({
           : dayHasPassed
           ? "lightgray"
           : "none",
-        color: !dayHasPassed ? accentColor : "#777777",
+        color: isToday ? "#777" : !dayHasPassed ? accentColor : "#777777",
         border: "1px solid gray",
         height: 100,
         //prevents double border on touching elements
@@ -124,12 +97,13 @@ export const Day = ({
         <span
           style={{
             fontSize: 12,
+            paddingTop: "4.5px",
           }}
         >
           Day: {day}
         </span>
         <div className="d-flex justify-content-center mt-2">
-          {dayCompleted || isCompleted ? (
+          {isCompleted ? (
             <BlackX
               color="#666"
               width={50}
@@ -145,6 +119,7 @@ export const Day = ({
           position: "absolute",
           right: 0,
           bottom: 0,
+          padding: "4.5px",
         }}
       >
         {date.format("M/DD")}
