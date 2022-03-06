@@ -126,7 +126,7 @@ export const AppWrapper: FC = ({ children }) => {
         break;
       case "signIn":
         console.log("Sign in Event fired");
-        setUser(user);
+        setUser(payload.data);
         if (localGoal) {
           const newUserName = payload.data.username.toString();
           addLocalGoalToUser(localGoal, newUserName).then(() => {
