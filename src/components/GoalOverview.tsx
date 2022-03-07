@@ -4,6 +4,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { Day } from "./Day";
 import { ModeButton } from "./shared/ModeButton";
 import { useAppContext } from "../context/state";
+import styled from "styled-components";
 
 const GoalOverview: FC = () => {
   const state = useAppContext();
@@ -44,11 +45,11 @@ const GoalOverview: FC = () => {
   };
   return (
     <Container className="CurrentGoal">
-      <h2>{name}</h2>
+      <NameHeader>{name}</NameHeader>
       <Container className="Goal">
-        <h4 style={{ color: "gray", fontWeight: 200 }}>
+        <StartDateHeader style={{ color: "gray", fontWeight: 200 }}>
           {/* Started {startDateObj.format("MM/DD/YY")} */}
-        </h4>
+        </StartDateHeader>
         <Container>
           <Row>
             {daysArray.map(({ date, day }) => {
@@ -66,19 +67,37 @@ const GoalOverview: FC = () => {
           </Row>
         </Container>
       </Container>
-      <Modal show={displayModal} onHide={handleClose}>
+      <MessageModal
+        className={state.theme.colorMode}
+        show={displayModal}
+        onHide={handleClose}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Hold Up</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="my-4">{modalData}</Modal.Body>
+        <Modal.Body>{modalData}</Modal.Body>
         <Modal.Footer>
           <ModeButton variant="secondary" onClick={handleClose}>
             Close
           </ModeButton>
         </Modal.Footer>
-      </Modal>
+      </MessageModal>
     </Container>
   );
 };
 
 export default GoalOverview;
+
+const NameHeader = styled.h2``;
+const StartDateHeader = styled.h4`
+  color: gray;
+  font-weight: 200;
+`;
+const MessageModal = styled(Modal)`
+  &.dark > .modal-dialog > .modal-content {
+    background-color: #666;
+  }
+  .modal-body {
+    margin: 0 1.5rem;
+  }
+`;
