@@ -18,9 +18,9 @@ export const ConfirmSignUpForm = ({
     setFormInputState({ ...formInputState, [e.target.name]: e.target.value });
   };
   return (
-    <Container fluid className="d-flex justify-content-center">
-      <Col className="d-flex flex-column" sm="8">
-        <h1 className="mt-4">Confirm Signup Here</h1>
+    <Container fluid>
+      <Col>
+        <h1>Confirm Signup Here</h1>
         <Formik
           enableReinitialize
           initialValues={{

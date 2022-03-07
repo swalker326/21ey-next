@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Auth } from "aws-amplify";
-import { Container } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { SignUpForm } from "./SignUpForm";
 import { ConfirmSignUpForm } from "./ConfirmSignUpForm";
 import { SignInForm } from "./SignInForm";
 import { useAppContext } from "../../context/state";
 import { FormInputState } from "./@types";
+import styled from "styled-components";
 
 export const Register: React.FC = ({ children }) => {
   const state = useAppContext();
@@ -66,34 +67,66 @@ export const Register: React.FC = ({ children }) => {
       </Container>
     );
   };
-
-  if (state.auth.registerFormState === "signUp")
-    return (
+  const formStateComponents = {
+    signUp: (
       <SignUpForm
         formInputState={formInputState}
         setFormInputState={setFormInputState}
         formSubmit={signup}
       />
-    );
-  if (state.auth.registerFormState === "signIn")
-    return (
+    ),
+    signIn: (
       <SignInForm
         formInputState={formInputState}
         setFormInputState={setFormInputState}
         formSubmit={signin}
       />
-    );
-  if (state.auth.registerFormState === "confirmSignUp")
-    return (
+    ),
+    confirmSignUp: (
       <ConfirmSignUpForm
         formInputState={formInputState}
         setFormInputState={setFormInputState}
         formSubmit={confirmSignUp}
       />
-    );
+    ),
+    signedIn: (
+      <Container fluid>
+        <div className="register">{children}</div>
+      </Container>
+    ),
+  };
+
   return (
-    <Container fluid className="hi there">
-      <div className="register">{children}</div>
+    <Container className="mt-4">
+      <ErrorContaier
+        sm={8}
+        className={`error-container ${
+          state.auth.errors.length > 0 ? "show" : null
+        }`}
+      >
+        {state.auth.errors.map((error: string, index) => (
+          <ErrorMessage key={`error_${index}`}>{error}</ErrorMessage>
+        ))}
+      </ErrorContaier>
+      {formStateComponents[state.auth.registerFormState]}
     </Container>
   );
 };
+
+const ErrorContaier = styled(Container)`
+  display: none;
+  justify-content: flex-start;
+  &.show {
+    display: flex;
+  }
+`;
+const ErrorMessage = styled(Col)`
+  color: #ff000090;
+  max-width: 500px;
+  padding: 8px;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid red;
+  background-color: #ff000030;
+`;

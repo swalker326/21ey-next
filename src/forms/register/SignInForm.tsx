@@ -18,13 +18,12 @@ export const SignInForm = ({
     password: string().required(),
   });
   const onChangeStateUpdate = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('Hi')
     setFormInputState({ ...formInputState, [e.target.name]: e.target.value });
   };
   return (
-    <Container fluid className="d-flex justify-content-center">
-      <Col className="d-flex flex-column" sm="8">
-        <h1 className="mt-4">Sign In</h1>
+    <Container fluid>
+      <Col>
+        <h1>Sign In</h1>
         <Formik
           enableReinitialize
           initialValues={{
@@ -41,13 +40,7 @@ export const SignInForm = ({
           {({ handleChange, touched, errors }) => {
             return (
               <Form style={{ maxWidth: "500px" }}>
-                <div
-                  className="form-group"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
+                <div>
                   <ValidatedFormField
                     label="email"
                     name="email"

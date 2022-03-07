@@ -17,6 +17,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import dayjs from "dayjs";
 import { listGoalsBySpecificOwner } from "../graphql/queries";
 import { useRouter } from "next/router";
+import { string } from "yup";
 
 type ColorMode = "light" | "dark";
 
@@ -51,6 +52,7 @@ type AppState = {
     setRegisterFormState: Dispatch<SetStateAction<FormState>>;
     signIn: (username: string, password: string) => void;
     signOut: () => void;
+    errors: string[];
   };
   data: {
     isLocalOnly: boolean;
@@ -75,7 +77,6 @@ export function useAppContext() {
   }
   return appContext;
 }
-
 export const AppWrapper: FC = ({ children }) => {
   const router = useRouter();
   const [user, setUser] = useState<CognitoUserAmplify | null>(null);
@@ -83,6 +84,7 @@ export const AppWrapper: FC = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [formState, setFormState] = useState<FormState>("signIn");
+  const [authErrors, setAuthErrors] = useState<string[]>([]);
   const [localGoal, setLocalGoal] = useLocalStorage<Goal | null>(
     "21ey_local_goal",
     null,
@@ -103,6 +105,7 @@ export const AppWrapper: FC = ({ children }) => {
           setLoading(false);
           console.log("no user checking for local goal");
           if (localGoal) {
+            console.log("localGoal :", localGoal);
             setActiveGoal(localGoal);
           }
         }
@@ -123,17 +126,26 @@ export const AppWrapper: FC = ({ children }) => {
         setUser(null);
         setFormState("signIn");
         setActiveGoal(null);
+        setAuthErrors([]);
         break;
       case "signIn":
         console.log("Sign in Event fired");
         setUser(payload.data);
+        setAuthErrors([]);
         if (localGoal) {
+          console.log("Local Goal Found, adding to server", localGoal);
           const newUserName = payload.data.username.toString();
           addLocalGoalToUser(localGoal, newUserName).then(() => {
             setLocalGoal(null);
           });
         } else {
           fetchGoals(payload.data);
+        }
+        break;
+      case "signIn_failure":
+        const message = payload.data.message;
+        if (message) {
+          setAuthErrors([...authErrors, message]);
         }
     }
   };
@@ -227,10 +239,12 @@ export const AppWrapper: FC = ({ children }) => {
         createdAt: createdAt,
         daysCompleted: daysCompleted,
       };
-      console.log("Trying to add: ", goal);
-      await API.graphql(graphqlOperation(createGoal, { input: goal }));
-    } catch (err) {
-      console.log("error creating goal: ", err);
+      const newServerGoal = await API.graphql(
+        graphqlOperation(createGoal, { input: goal }),
+      );
+      setActiveGoal(newServerGoal);
+    } catch (error) {
+      console.error("error creating local goal: ", error);
     }
   };
 
@@ -248,6 +262,7 @@ export const AppWrapper: FC = ({ children }) => {
       setRegisterFormState: setFormState,
       signIn,
       signOut,
+      errors: authErrors,
     },
     data: {
       isLocalOnly: false, //#TODO

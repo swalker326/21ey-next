@@ -25,9 +25,9 @@ export const SignUpForm = ({
   };
 
   return (
-    <Container fluid className="d-flex justify-content-center">
-      <Col className="d-flex flex-column" sm="8">
-        <h1 className="mt-4">Sign Up</h1>
+    <Container fluid>
+      <Col>
+        <h1>Sign Up</h1>
         <Formik
           enableReinitialize
           initialValues={{
@@ -46,13 +46,7 @@ export const SignUpForm = ({
           {({ handleChange }) => {
             return (
               <Form style={{ maxWidth: "500px" }}>
-                <div
-                  className="form-group"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
+                <div>
                   <ValidatedFormField
                     type="email"
                     id="email"
