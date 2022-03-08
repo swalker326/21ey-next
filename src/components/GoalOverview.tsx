@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, SetStateAction, useState, useRef } from "react";
 import { Container, Modal, Row } from "react-bootstrap";
 import dayjs, { Dayjs } from "dayjs";
 import { Day } from "./Day";
@@ -8,6 +8,26 @@ import styled from "styled-components";
 
 const GoalOverview: FC = () => {
   const state = useAppContext();
+  const [displayModal, setDisplayModal] = useState<boolean>(false);
+  const [showCopy, setShowCopy] = useState<"show" | "hide">("hide");
+  const [modalData, setModalData] = useState<string | undefined>(undefined);
+  const buildShare = () => {
+    setShowCopy("show");
+    setTimeout(() => {
+      setShowCopy("hide");
+    }, 2500);
+    const shareString = daysArray.map((day, index) => {
+      const newLine = index === 6 || index === 13;
+      return isDayCompleted(day.date)
+        ? `${String.fromCharCode(9989)} ${newLine ? "\n" : ""}`
+        : `${String.fromCharCode(11036)} ${newLine ? "\n" : ""}`;
+    });
+    navigator.clipboard.writeText(
+      `21ey completed ${
+        state.data.activeGoal?.daysCompleted?.length
+      }/21 \n${shareString.join("")}`,
+    );
+  };
   const goal = state.data.activeGoal
     ? state.data.activeGoal
     : state.data.localGoal;
@@ -25,8 +45,6 @@ const GoalOverview: FC = () => {
     };
   });
 
-  const [displayModal, setDisplayModal] = useState<boolean>(false);
-  const [modalData, setModalData] = useState<string | undefined>(undefined);
   const handleClose = () => {
     console.log("Fired Handle Close");
     setDisplayModal(false);
@@ -44,13 +62,19 @@ const GoalOverview: FC = () => {
     return completed;
   };
   return (
-    <Container className="CurrentGoal">
-      <NameHeader>{name}</NameHeader>
-      <Container className="Goal">
-        <StartDateHeader style={{ color: "gray", fontWeight: 200 }}>
+    <GoalOverviewContainer fluid className="CurrentGoal">
+      <GoalOverviewHeader>
+        <NameHeader>{name}</NameHeader>
+        <div style={{ position: "relative" }}>
+          <CopiedAlert className={showCopy}>Copied</CopiedAlert>
+          <ModeButton onClick={buildShare}>Share Progress</ModeButton>
+        </div>
+      </GoalOverviewHeader>
+      <GoalOverviewContainer fluid className="Goal">
+        <StartDateHeader>
           {/* Started {startDateObj.format("MM/DD/YY")} */}
         </StartDateHeader>
-        <Container>
+        <GoalOverviewContainer fluid>
           <Row>
             {daysArray.map(({ date, day }) => {
               return (
@@ -65,8 +89,8 @@ const GoalOverview: FC = () => {
               );
             })}
           </Row>
-        </Container>
-      </Container>
+        </GoalOverviewContainer>
+      </GoalOverviewContainer>
       <MessageModal
         className={state.theme.colorMode}
         show={displayModal}
@@ -82,7 +106,7 @@ const GoalOverview: FC = () => {
           </ModeButton>
         </Modal.Footer>
       </MessageModal>
-    </Container>
+    </GoalOverviewContainer>
   );
 };
 
@@ -92,6 +116,28 @@ const NameHeader = styled.h2``;
 const StartDateHeader = styled.h4`
   color: gray;
   font-weight: 200;
+`;
+const GoalOverviewHeader = styled(Container)`
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+`;
+const CopiedAlert = styled.div`
+  position: absolute;
+  left: -3.75rem;
+  top: 6px;
+  color: #666;
+  border-radius: 6px;
+  transition: opacity 0.5s;
+  opacity: 0;
+  &.show {
+    transition: opacity 0.5s;
+    opacity: 1;
+  }
+`;
+const GoalOverviewContainer = styled(Container)`
+  margin: 0;
+  padding: 0;
 `;
 const MessageModal = styled(Modal)`
   &.dark > .modal-dialog > .modal-content {

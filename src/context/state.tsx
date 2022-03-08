@@ -85,6 +85,7 @@ export const AppWrapper: FC = ({ children }) => {
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [formState, setFormState] = useState<FormState>("signIn");
   const [authErrors, setAuthErrors] = useState<string[]>([]);
+  const [localColorMode, setLocalColorMode] = useLocalStorage<ColorMode>("21ey_local_colorMode", "light");
   const [localGoal, setLocalGoal] = useLocalStorage<Goal | null>(
     "21ey_local_goal",
     null,
@@ -116,6 +117,7 @@ export const AppWrapper: FC = ({ children }) => {
       const { payload } = data;
       onAuthEvent(payload);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onAuthEvent = (payload: HubPayload) => {
@@ -191,30 +193,27 @@ export const AppWrapper: FC = ({ children }) => {
           owner: passedUser?.username || user?.username?.toString(),
         }),
       )) as { data: ListGoalsBySpecificOwnerQuery };
-      console.log(
-        "GoalData? :",
-        goalData.data?.listGoalsBySpecificOwner?.items &&
-          goalData.data.listGoalsBySpecificOwner.items.length > 0,
-      );
       if (
         goalData.data.listGoalsBySpecificOwner?.items &&
         goalData.data.listGoalsBySpecificOwner.items.length > 0
       ) {
-        const fetchedGoal: Goal = {
-          id: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.id,
-          name: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.name,
-          type: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.type,
-          owner: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.owner,
-          status: goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.status,
-          startDate:
-            goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.startDate,
-          createdAt:
-            goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.createdAt,
-          daysCompleted:
-            goalData.data?.listGoalsBySpecificOwner?.items?.[0]?.daysCompleted,
-        };
-        setActiveGoal(fetchedGoal);
-        console.log("setActiveGoal to : ", fetchedGoal);
+        const fetchedActiveGoal = goalData.data.listGoalsBySpecificOwner.items.find(
+          (goal) => goal?.status === GoalStatus.ACTIVE,
+        );
+        if (fetchedActiveGoal) {
+          const activeGoal: Goal = {
+            id: fetchedActiveGoal.id,
+            name: fetchedActiveGoal.name,
+            type: fetchedActiveGoal.type,
+            owner: fetchedActiveGoal.owner,
+            status: fetchedActiveGoal.status,
+            startDate: fetchedActiveGoal.startDate,
+            createdAt: fetchedActiveGoal.createdAt,
+            daysCompleted: fetchedActiveGoal.daysCompleted,
+          };
+          setActiveGoal(activeGoal);
+          console.log("setActiveGoal to : ", activeGoal);
+        }
       } else {
         setActiveGoal(null);
         console.log("No Local Goal or stored goal found, create one");
@@ -274,6 +273,9 @@ export const AppWrapper: FC = ({ children }) => {
       addGoal,
     },
   };
+  useEffect(() => {
+
+  }, [appState.theme.colorMode]) 
 
   return <AppContext.Provider value={appState}>{children}</AppContext.Provider>;
 };

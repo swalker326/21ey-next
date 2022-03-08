@@ -1,11 +1,15 @@
 import { Dispatch, SetStateAction } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import advancedFormat from 'dayjs/plugin/advancedFormat'
+dayjs.extend(advancedFormat)
 import { Col } from "react-bootstrap";
-import BlackX from "./shared/BlackXSvg";
+import CompletedX from "../../public/black_x.svg";
 import { updateGoal } from "../graphql/mutations";
 import { API, graphqlOperation } from "aws-amplify";
 import { Goal, useAppContext } from "../context/state";
 import { UpdateGoalMutation } from "../API";
+import { devices } from "../styles/devices";
+import styled from "styled-components";
 
 type DayProps = {
   day: number;
@@ -49,7 +53,6 @@ export const Day = ({
               startDate: updateGoal.startDate,
               status: updateGoal.status,
             };
-            console.log("newGoal: ", newGoal);
             state.data.setActiveGoal(newGoal);
           }
         },
@@ -123,26 +126,30 @@ export const Day = ({
         </span>
         <div className="d-flex justify-content-center mt-2">
           {isCompleted ? (
-            <BlackX
-              color="#666"
-              width={50}
-              heigth={50}
-              style={{ top: 35, left: 65 }}
-            />
+            <CompletedSvg>
+              <CompletedX />
+            </CompletedSvg>
           ) : null}
         </div>
       </div>
-      <div
-        style={{
-          fontSize: 12,
-          position: "absolute",
-          right: 0,
-          bottom: 0,
-          padding: "4.5px",
-        }}
-      >
-        {date.format("M/DD")}
-      </div>
+      <DateContainer>{date.format("Do")}</DateContainer>
     </Col>
   );
 };
+
+const CompletedSvg = styled.div`
+  fill: #666;
+  width: 60px;
+  height: 60px;
+  ${devices.custom(800)} {
+    width: 30px;
+    height: 30px;
+  }
+`;
+const DateContainer = styled.div`
+  font-size: 12px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0.5rem;
+`;
