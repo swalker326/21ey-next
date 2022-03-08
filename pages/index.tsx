@@ -12,7 +12,7 @@ const Home: NextPage = () => {
   const state = useAppContext();
 
   return (
-    <div className={styles.container}>
+    <Container fluid>
       <Head>
         <title>21ey</title>
         <meta name="description" content="Make positive habits" />
@@ -27,10 +27,10 @@ const Home: NextPage = () => {
         <style jsx global>
           {`
             body {
-              background-color: ${state.theme.colorMode === "dark"
+              background-color: ${state.theme?.colorMode === "dark" && "#525659"
                 ? "#525659"
                 : "inhearit"};
-              color: ${state.theme.colorMode === "dark" ? "#f8f9fa" : "black"};
+              color: ${state.theme?.colorMode === "dark" ? "#f8f9fa" : "black"};
             }
           `}
         </style>
@@ -39,7 +39,6 @@ const Home: NextPage = () => {
             <GoalOverview />
           ) : (
             <Container>
-              <Loader />
               <Row>
                 <Col sm={12} md={6} style={{ padding: "1rem" }}>
                   <h1 className="my-4">
@@ -89,7 +88,7 @@ const Home: NextPage = () => {
           )}
         </Loader>
       </Container>
-    </div>
+    </Container>
   );
 };
 

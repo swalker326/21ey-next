@@ -4,7 +4,7 @@ import { useAppContext } from "../../context/state";
 export const Loader: React.FC = ({ children }) => {
   const state = useAppContext();
   return (
-    <Container>
+    <Container fluid>
       {state.loading ? (
         <Container className="d-flex justify-content-center">
           <Spinner
