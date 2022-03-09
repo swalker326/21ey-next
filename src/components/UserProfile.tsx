@@ -8,7 +8,6 @@ import {
   GoalStatus,
   ListGoalsBySpecificOwnerQuery,
   UpdateGoalInput,
-  UpdateGoalMutation,
 } from "../API";
 import { updateGoal } from "../graphql/mutations";
 import { useAppContext } from "../context/state";
@@ -66,7 +65,10 @@ export const UserProfile = () => {
   const abandonGoal = async (goal: Goal) => {
     if (goal.id) {
       updateGoalData({ id: goal?.id, status: GoalStatus.FAILED })
-        .then(fetchUserGoals)
+        .then(() => {
+          fetchUserGoals;
+          state.data.setActiveGoal(null);
+        })
         .catch((error) => console.error(error));
     }
   };
@@ -117,9 +119,55 @@ export const UserProfile = () => {
         </ModeButton>
       </ProfileHeader>
       <ProfileBody>
+        {state.data.activeGoal ? (
+          <div>
+            <GoalSectionTitle>Active Goal</GoalSectionTitle>
+            <GoalWrapper
+              style={{ marginTop: "1rem" }}
+              key={state.data.activeGoal?.id}
+              className={state.theme.colorMode === "dark" ? "dark" : ""}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <h4>{state.data.activeGoal?.name} </h4>
+                <GoalStatusContainer>
+                  <GoalStatusValue>
+                    statues:{" "}
+                    {state.data.activeGoal?.status
+                      ? getGoalStatus(state.data.activeGoal?.status)
+                      : null}
+                  </GoalStatusValue>
+                  <ModeButton
+                    color="#666"
+                    onClick={() =>
+                      handleGoalButtonClick(state.data.activeGoal as Goal)
+                    }
+                  >
+                    Abandon
+                  </ModeButton>
+                </GoalStatusContainer>
+              </div>
+              <div>
+                <h5>
+                  <DaysCompleted style={{ color: "#F6BE00" }}>
+                    {state.data.activeGoal.daysCompleted?.length || 0} of 21{" "}
+                  </DaysCompleted>
+                  <span style={{ fontWeight: 200 }}>days completed</span>
+                </h5>
+              </div>
+            </GoalWrapper>
+          </div>
+        ) : (
+          <div>
+            You&#39;re not tracking any habits 😿 get started by{" "}
+            <Link href="/" passHref>
+              <NewGoalLink>creating a new goal</NewGoalLink>
+            </Link>
+          </div>
+        )}
+        <GoalSectionTitle>Past Goal(s)</GoalSectionTitle>
         {goals?.listGoalsBySpecificOwner?.items?.length ? (
           goals.listGoalsBySpecificOwner.items.map((goal) => {
-            if (goal) {
+            if (goal && goal.status !== GoalStatus.ACTIVE) {
               return (
                 <GoalWrapper
                   key={goal.id}
@@ -138,9 +186,7 @@ export const UserProfile = () => {
                         color="#666"
                         onClick={() => handleGoalButtonClick(goal)}
                       >
-                        {goal.status === GoalStatus.ACTIVE
-                          ? "Abandon"
-                          : goal.status === GoalStatus.FAILED
+                        {goal.status === GoalStatus.FAILED
                           ? "Restart"
                           : "Share"}
                       </ModeButton>
@@ -160,7 +206,7 @@ export const UserProfile = () => {
           })
         ) : (
           <div>
-            You're not tracking any habits 😿 get started by{" "}
+            You&#39;re not tracking any habits 😿 get started by{" "}
             <Link href="/" passHref>
               <NewGoalLink>creating a new goal</NewGoalLink>
             </Link>
@@ -193,7 +239,7 @@ const GoalStatusValue = styled.span`
 const GoalWrapper = styled.div`
   position: relative;
   padding: 1.2rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
   border-radius: 8px;
   background-color: #ebebeb;
   &.dark {
@@ -206,4 +252,7 @@ const NewGoalLink = styled.a`
   &:hover {
     color: #f6be0090;
   }
+`;
+const GoalSectionTitle = styled.h5`
+  margin-top: 1.5rem;
 `;

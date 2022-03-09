@@ -1,15 +1,14 @@
 import { Dispatch, SetStateAction } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-dayjs.extend(advancedFormat)
+import advancedFormat from "dayjs/plugin/advancedFormat";
+dayjs.extend(advancedFormat);
+import { darken, lighten } from "polished";
 import { Col } from "react-bootstrap";
 import CompletedX from "../../public/black_x.svg";
-import { updateGoal } from "../graphql/mutations";
-import { API, graphqlOperation } from "aws-amplify";
-import { Goal, useAppContext } from "../context/state";
-import { UpdateGoalMutation } from "../API";
+import { useAppContext } from "../context/state";
 import { devices } from "../styles/devices";
 import styled from "styled-components";
+import { updateUserGoal } from "../actions/actions";
 
 type DayProps = {
   day: number;
@@ -28,44 +27,27 @@ export const Day = ({
 }: DayProps) => {
   const state = useAppContext();
   const isToday = date.isSame(dayjs(), "day");
-
-  const updateGoalDailyCompletion = () => {
+  const updateGoalDailyCompletion = async () => {
+    console.log("FIred Update Goal Daily");
+    console.log(!state.data.activeGoal?.id);
+    if (!state.data.activeGoal?.name) return;
     const updatedGoal = {
-      id: state.data.activeGoal?.id,
+      id: state.data.activeGoal.id || "local_goal",
       daysCompleted:
         state.data.activeGoal?.daysCompleted &&
         state.data.activeGoal.daysCompleted?.length > 0
           ? [...state.data.activeGoal.daysCompleted, date.format("YYYY-MM-DD")]
           : [date.format("YYYY-MM-DD")],
     };
-    if (state.auth.user) {
-      console.log("user detected");
-      API.graphql(graphqlOperation(updateGoal, { input: updatedGoal })).then(
-        ({ data: { updateGoal } }: { data: UpdateGoalMutation }) => {
-          if (updateGoal) {
-            const newGoal: Goal = {
-              id: updateGoal.id,
-              owner: updateGoal.owner,
-              type: updateGoal.type,
-              name: updateGoal.name,
-              daysCompleted: updateGoal.daysCompleted,
-              createdAt: updateGoal.createdAt,
-              startDate: updateGoal.startDate,
-              status: updateGoal.status,
-            };
-            state.data.setActiveGoal(newGoal);
-          }
-        },
-      );
-    } else {
-      if (state.data.activeGoal) {
-        const newLocalGoal = {
-          ...state.data.activeGoal,
-          daysCompleted: updatedGoal.daysCompleted,
-        };
-        state.data.setLocalGoal(newLocalGoal);
-        state.data.setActiveGoal(newLocalGoal);
-      }
+    const updateGoalReponse = state.auth.user
+      ? await updateUserGoal(state.data.activeGoal, updatedGoal)
+      : await updateUserGoal(state.data.activeGoal, updatedGoal, true);
+
+    if (!state.auth.user && updateGoalReponse) {
+      state.data.setLocalGoal(updateGoalReponse);
+    }
+    if (updateGoalReponse) {
+      state.data.setActiveGoal(updateGoalReponse);
     }
   };
 
@@ -89,25 +71,13 @@ export const Day = ({
   const accentColor = state.theme.colorMode === "dark" ? "#cccccc" : "#777777";
 
   return (
-    <Col
+    <DayContainer
       onClick={handleDayClick}
       xs={3}
       sm={2}
-      style={{
-        position: "relative",
-        backgroundColor: isToday
-          ? "#F6BE00"
-          : dayHasPassed
-          ? "lightgray"
-          : "none",
-        color: isToday ? "#777" : !dayHasPassed ? accentColor : "#777777",
-        border: "1px solid gray",
-        height: 100,
-        //prevents double border on touching elements
-        marginTop: "-1px",
-        marginLeft: "-1px",
-      }}
-      className="flex"
+      className={`flex ${dayHasPassed ? "passed " : ""} ${
+        state.theme.colorMode === "dark" ? "dark " : ""
+      } ${isToday ? "today" : ""}`}
     >
       <div
         style={{
@@ -133,7 +103,7 @@ export const Day = ({
         </div>
       </div>
       <DateContainer>{date.format("Do")}</DateContainer>
-    </Col>
+    </DayContainer>
   );
 };
 
@@ -144,6 +114,39 @@ const CompletedSvg = styled.div`
   ${devices.custom(800)} {
     width: 30px;
     height: 30px;
+  }
+`;
+const isToday = false;
+const dayHasPassed = true;
+const accentColor = "#666";
+const DayContainer = styled(Col)`
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  position: relative;
+  background-color: "none";
+  color: ${isToday ? "#777" : !dayHasPassed ? accentColor : "#777777"};
+  border: 1px solid gray;
+  height: 100px;
+  //prevents double border on touching elements
+  margin-top: -1px;
+  margin-left: -1px;
+  &:hover {
+    background-color: ${darken(0.1, "#fff")};
+    &.dark {
+      background-color: ${darken(0.1, "#666")};
+    }
+  }
+  &.passed {
+    background-color: lightgray;
+    &:hover {
+      background-color: ${darken(0.1, "lightgray")};
+    }
+  }
+  &.today {
+    background-color: #f6be00;
+    &:hover {
+      background-color: ${lighten(0.1, "#f6be00")};
+    }
   }
 `;
 const DateContainer = styled.div`

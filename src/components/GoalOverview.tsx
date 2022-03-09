@@ -11,33 +11,40 @@ const GoalOverview: FC = () => {
   const [displayModal, setDisplayModal] = useState<boolean>(false);
   const [showCopy, setShowCopy] = useState<"show" | "hide">("hide");
   const [modalData, setModalData] = useState<string | undefined>(undefined);
+
   const buildShare = () => {
     setShowCopy("show");
     setTimeout(() => {
       setShowCopy("hide");
     }, 2500);
+
     const shareString = daysArray.map((day, index) => {
       const newLine = index === 6 || index === 13;
       return isDayCompleted(day.date)
         ? `${String.fromCharCode(9989)} ${newLine ? "\n" : ""}`
         : `${String.fromCharCode(11036)} ${newLine ? "\n" : ""}`;
     });
+
     navigator.clipboard.writeText(
       `21ey completed ${
         state.data.activeGoal?.daysCompleted?.length
       }/21 \n${shareString.join("")}`,
     );
   };
+
   const goal = state.data.activeGoal
     ? state.data.activeGoal
     : state.data.localGoal;
+
   let id: string | null | undefined,
     name: string | undefined,
     startDate: string | undefined | null,
     daysCompleted: (string | null)[] | null | undefined;
+
   if (goal) {
     ({ name, startDate, daysCompleted, id } = goal);
   }
+
   const daysArray = Array.from(Array(21).keys()).map((i) => {
     return {
       day: i + 1,
@@ -46,9 +53,9 @@ const GoalOverview: FC = () => {
   });
 
   const handleClose = () => {
-    console.log("Fired Handle Close");
     setDisplayModal(false);
   };
+
   const isDayCompleted = (date: Dayjs) => {
     const daysArray =
       daysCompleted &&
@@ -65,6 +72,7 @@ const GoalOverview: FC = () => {
     <GoalOverviewContainer fluid className="CurrentGoal">
       <GoalOverviewHeader>
         <NameHeader>{name}</NameHeader>
+        {/* {JSON.stringify(state.data.activeGoal)} */}
         <div style={{ position: "relative" }}>
           <CopiedAlert className={showCopy}>Copied</CopiedAlert>
           <ModeButton onClick={buildShare}>Share Progress</ModeButton>

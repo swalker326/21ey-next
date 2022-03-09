@@ -11,13 +11,12 @@ import {
 import { API, Auth, graphqlOperation, Hub } from "aws-amplify";
 import { FormState } from "../forms/register/@types";
 import { HubPayload } from "@aws-amplify/core";
-import { GoalStatus, ListGoalsBySpecificOwnerQuery } from "../API";
+import { Goal, GoalStatus, ListGoalsBySpecificOwnerQuery } from "../API";
 import { createGoal } from "../graphql/mutations";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import dayjs from "dayjs";
 import { listGoalsBySpecificOwner } from "../graphql/queries";
 import { useRouter } from "next/router";
-import { string } from "yup";
+import { addUserGoal } from "../actions/goals";
 
 type ColorMode = "light" | "dark";
 
@@ -27,16 +26,16 @@ type AddGoalProps = {
   daysCompleted?: (string | null)[] | null;
 };
 
-export type Goal = {
-  id?: string | null;
-  name: string | undefined;
-  type: string | undefined | null;
-  owner: string | null | undefined;
-  status: GoalStatus | null | undefined;
-  startDate: string | null | undefined;
-  createdAt: string | null | undefined;
-  daysCompleted?: (string | null)[] | null;
-};
+// export type Goal = {
+//   id?: string | null;
+//   name: string | undefined;
+//   type: string | undefined | null;
+//   owner: string | null | undefined;
+//   status: GoalStatus | null | undefined;
+//   startDate: string | null | undefined;
+//   createdAt: string | null | undefined;
+//   daysCompleted?: (string | null)[] | null;
+// };
 
 type AppState = {
   loading: boolean;
@@ -85,7 +84,10 @@ export const AppWrapper: FC = ({ children }) => {
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [formState, setFormState] = useState<FormState>("signIn");
   const [authErrors, setAuthErrors] = useState<string[]>([]);
-  const [localColorMode, setLocalColorMode] = useLocalStorage<ColorMode>("21ey_local_colorMode", "light");
+  const [localColorMode, setLocalColorMode] = useLocalStorage<ColorMode>(
+    "21ey_local_colorMode",
+    "light",
+  );
   const [localGoal, setLocalGoal] = useLocalStorage<Goal | null>(
     "21ey_local_goal",
     null,
@@ -131,7 +133,6 @@ export const AppWrapper: FC = ({ children }) => {
         setAuthErrors([]);
         break;
       case "signIn":
-        console.log("Sign in Event fired");
         setUser(payload.data);
         setAuthErrors([]);
         if (localGoal) {
@@ -171,19 +172,19 @@ export const AppWrapper: FC = ({ children }) => {
     { name, startDate }: AddGoalProps,
     isLocal = false,
   ) => {
-    const goal = {
-      name: name,
-      type: "goal",
-      owner: user?.username?.toString(),
-      status: GoalStatus.ACTIVE,
-      startDate: startDate,
-      createdAt: dayjs().toISOString(),
-    };
-    console.log("Trying to add: ", goal);
-    isLocal
-      ? setLocalGoal(goal)
-      : await API.graphql(graphqlOperation(createGoal, { input: goal }));
-    setActiveGoal(goal);
+    const newGoal =
+      !isLocal && user?.username?.toString()
+        ? await addUserGoal(
+            { name, startDate, owner: user?.username?.toString() },
+            isLocal,
+          )
+        : await addUserGoal({ name, startDate, owner: "localOwner" }, isLocal);
+    if (newGoal) {
+      setActiveGoal(newGoal);
+    }
+    if (isLocal) {
+      setLocalGoal(newGoal);
+    }
   };
 
   const fetchGoals = async (passedUser: CognitoUserAmplify) => {
@@ -197,11 +198,13 @@ export const AppWrapper: FC = ({ children }) => {
         goalData.data.listGoalsBySpecificOwner?.items &&
         goalData.data.listGoalsBySpecificOwner.items.length > 0
       ) {
-        const fetchedActiveGoal = goalData.data.listGoalsBySpecificOwner.items.find(
-          (goal) => goal?.status === GoalStatus.ACTIVE,
-        );
+        const fetchedActiveGoal =
+          goalData.data.listGoalsBySpecificOwner.items.find(
+            (goal) => goal?.status === GoalStatus.ACTIVE,
+          );
         if (fetchedActiveGoal) {
           const activeGoal: Goal = {
+            __typename: "Goal",
             id: fetchedActiveGoal.id,
             name: fetchedActiveGoal.name,
             type: fetchedActiveGoal.type,
@@ -230,6 +233,8 @@ export const AppWrapper: FC = ({ children }) => {
     const { name, startDate, createdAt, daysCompleted } = goal;
     try {
       const goal: Goal = {
+        __typename: "Goal",
+        id: "local_goal",
         name: name,
         type: "goal",
         owner: newUserName,
@@ -273,9 +278,7 @@ export const AppWrapper: FC = ({ children }) => {
       addGoal,
     },
   };
-  useEffect(() => {
-
-  }, [appState.theme.colorMode]) 
+  useEffect(() => {}, [appState.theme.colorMode]);
 
   return <AppContext.Provider value={appState}>{children}</AppContext.Provider>;
 };
