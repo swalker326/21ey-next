@@ -24,9 +24,9 @@ type Goal
     queryField: "listGoalsBySpecificOwner"
   ) {
   type: String!
-  id: ID
+  id: ID!
   owner: String!
-  status: GoalStatus
+  status: GoalStatus!
   name: String!
   startDate: AWSDate!
   createdAt: AWSDateTime!

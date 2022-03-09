@@ -6,7 +6,7 @@ export type CreateGoalInput = {
   type: string,
   id?: string | null,
   owner: string,
-  status?: GoalStatus | null,
+  status: GoalStatus,
   name: string,
   startDate: string,
   createdAt: string,
@@ -79,13 +79,13 @@ export type ModelGoalStatusInput = {
 
 export type Goal = {
   __typename: "Goal",
-  type?: string,
-  id?: string | null,
-  owner?: string,
-  status?: GoalStatus | null,
-  name?: string,
-  startDate?: string,
-  createdAt?: string,
+  type: string,
+  id: string,
+  owner: string,
+  status: GoalStatus,
+  name: string,
+  startDate: string,
+  createdAt: string,
   daysCompleted?: Array< string | null > | null,
 };
 
@@ -101,7 +101,7 @@ export type UpdateGoalInput = {
 };
 
 export type DeleteGoalInput = {
-  id?: string | null,
+  id: string,
 };
 
 export type ModelGoalFilterInput = {
@@ -136,7 +136,7 @@ export type ModelIDInput = {
 
 export type ModelGoalConnection = {
   __typename: "ModelGoalConnection",
-  items?:  Array<Goal | null > | null,
+  items:  Array<Goal | null >,
   nextToken?: string | null,
 };
 
@@ -157,7 +157,7 @@ export enum ModelSortDirection {
 
 
 export type CreateGoalMutationVariables = {
-  input?: CreateGoalInput,
+  input: CreateGoalInput,
   condition?: ModelGoalConditionInput | null,
 };
 
@@ -165,9 +165,9 @@ export type CreateGoalMutation = {
   createGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
@@ -176,7 +176,7 @@ export type CreateGoalMutation = {
 };
 
 export type UpdateGoalMutationVariables = {
-  input?: UpdateGoalInput,
+  input: UpdateGoalInput,
   condition?: ModelGoalConditionInput | null,
 };
 
@@ -184,9 +184,9 @@ export type UpdateGoalMutation = {
   updateGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
@@ -195,7 +195,7 @@ export type UpdateGoalMutation = {
 };
 
 export type DeleteGoalMutationVariables = {
-  input?: DeleteGoalInput,
+  input: DeleteGoalInput,
   condition?: ModelGoalConditionInput | null,
 };
 
@@ -203,9 +203,9 @@ export type DeleteGoalMutation = {
   deleteGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
@@ -214,16 +214,16 @@ export type DeleteGoalMutation = {
 };
 
 export type GetGoalQueryVariables = {
-  id?: string,
+  id: string,
 };
 
 export type GetGoalQuery = {
   getGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
@@ -240,17 +240,17 @@ export type ListGoalsQueryVariables = {
 export type ListGoalsQuery = {
   listGoals?:  {
     __typename: "ModelGoalConnection",
-    items?:  Array< {
+    items:  Array< {
       __typename: "Goal",
       type: string,
-      id?: string | null,
+      id: string,
       owner: string,
-      status?: GoalStatus | null,
+      status: GoalStatus,
       name: string,
       startDate: string,
       createdAt: string,
       daysCompleted?: Array< string | null > | null,
-    } | null > | null,
+    } | null >,
     nextToken?: string | null,
   } | null,
 };
@@ -267,17 +267,17 @@ export type ListGoalsBySpecificOwnerQueryVariables = {
 export type ListGoalsBySpecificOwnerQuery = {
   listGoalsBySpecificOwner?:  {
     __typename: "ModelGoalConnection",
-    items?:  Array< {
+    items:  Array< {
       __typename: "Goal",
       type: string,
-      id?: string | null,
+      id: string,
       owner: string,
-      status?: GoalStatus | null,
+      status: GoalStatus,
       name: string,
       startDate: string,
       createdAt: string,
       daysCompleted?: Array< string | null > | null,
-    } | null > | null,
+    } | null >,
     nextToken?: string | null,
   } | null,
 };
@@ -286,9 +286,9 @@ export type OnCreateGoalSubscription = {
   onCreateGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
@@ -300,9 +300,9 @@ export type OnUpdateGoalSubscription = {
   onUpdateGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
@@ -314,9 +314,9 @@ export type OnDeleteGoalSubscription = {
   onDeleteGoal?:  {
     __typename: "Goal",
     type: string,
-    id?: string | null,
+    id: string,
     owner: string,
-    status?: GoalStatus | null,
+    status: GoalStatus,
     name: string,
     startDate: string,
     createdAt: string,
